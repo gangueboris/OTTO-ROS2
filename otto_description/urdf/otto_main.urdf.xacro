@@ -1,0 +1,303 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="otto">
+
+  <!-- ============================================================
+       OTTO ROBOT — Main URDF model
+       otto_main.urdf.xacro
+
+       Kinematic structure
+       ───────────────────
+       base_link  (virtual, at floor level)
+         └── body_link          [fixed]    — torso + head box
+               ├── left_eye     [fixed]    — ultrasonic sensor L  (macro)
+               ├── right_eye    [fixed]    — ultrasonic sensor R  (macro)
+               ├── left_hip_servo  [fixed] — servo block L  (macro)
+               │     └── left_hip_joint   [revolute, Z]
+               │           └── left_leg_link
+               │                 └── left_foot_joint [revolute, Z]
+               │                       └── left_foot_link
+               └── right_hip_servo [fixed] — servo block R  (macro)
+                     └── right_hip_joint  [revolute, Z]
+                           └── right_leg_link
+                                 └── right_foot_joint [revolute, Z]
+                                       └── right_foot_link
+
+       Coordinate convention
+       ──────────────────────
+       +X  forward   +Y  left   +Z  up
+       All dimensions in metres, masses in kg.
+  ============================================================ -->
+
+  <!-- ── Include utilities ── -->
+  <xacro:include filename="$(find otto_description)/urdf/otto_materials.xacro"/>
+
+  <!-- ──────────────────────────────────────────────────────────
+       PHYSICAL PARAMETERS  (tweak here to match your print)
+  ────────────────────────────────────────────────────────────── -->
+
+  <!-- Body / head combined box -->
+  <xacro:property name="body_x"    value="0.075"/>   <!-- width  -->
+  <xacro:property name="body_y"    value="0.060"/>   <!-- depth  -->
+  <xacro:property name="body_z"    value="0.080"/>   <!-- height -->
+  <xacro:property name="body_mass" value="0.120"/>
+
+  <!-- Leg segment -->
+  <xacro:property name="leg_x"    value="0.020"/>
+  <xacro:property name="leg_y"    value="0.015"/>
+  <xacro:property name="leg_z"    value="0.045"/>
+  <xacro:property name="leg_mass" value="0.025"/>
+
+  <!-- Foot (flat disc) -->
+  <xacro:property name="foot_r"    value="0.030"/>
+  <xacro:property name="foot_h"    value="0.008"/>
+  <xacro:property name="foot_mass" value="0.020"/>
+
+  <!-- Servo joint limits (±30° realistic for Otto walk) -->
+  <xacro:property name="servo_limit" value="0.5236"/>   <!-- rad, ~30° -->
+  <xacro:property name="servo_vel"   value="3.14"/>     <!-- rad/s     -->
+  <xacro:property name="servo_eff"   value="0.5"/>      <!-- N·m       -->
+
+  <!-- Lateral offset: distance from body centre to each leg -->
+  <xacro:property name="leg_offset_y" value="0.025"/>
+
+  <!-- Vertical offsets -->
+  <!-- body_link origin is at the body's geometric centre -->
+  <xacro:property name="body_z_from_base" value="${body_z/2.0}"/>
+  <!-- hip joint is at bottom face of body, laterally offset -->
+  <xacro:property name="hip_z_in_body"    value="${-body_z/2.0}"/>
+  <!-- foot joint is at the bottom of the leg -->
+  <xacro:property name="foot_z_in_leg"    value="${-leg_z/2.0}"/>
+
+  <!-- ──────────────────────────────────────────────────────────
+       BASE LINK  (world / floor anchor, mass-less)
+  ────────────────────────────────────────────────────────────── -->
+
+  <link name="base_link"/>
+
+  <!-- ──────────────────────────────────────────────────────────
+       BODY / HEAD LINK
+  ────────────────────────────────────────────────────────────── -->
+
+  <link name="body_link">
+    <xacro:inertia_box m="${body_mass}" x="${body_x}" y="${body_y}" z="${body_z}"/>
+
+    <!-- Torso + head box (grey top, blue sides) — single visual block -->
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${body_x} ${body_y} ${body_z}"/>
+      </geometry>
+      <material name="otto_grey"/>
+    </visual>
+
+    <!-- Blue mid-band visual -->
+    <visual>
+      <origin xyz="0 0 ${-body_z*0.1}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${body_x} ${body_y} ${body_z*0.40}"/>
+      </geometry>
+      <material name="otto_blue"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${body_x} ${body_y} ${body_z}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="base_to_body" type="fixed">
+    <parent link="base_link"/>
+    <child  link="body_link"/>
+    <origin xyz="0 0 ${body_z_from_base}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ──────────────────────────────────────────────────────────
+       ULTRASONIC EYES  (macro from otto_materials.xacro)
+       Placed on the front face (+X), mirrored on Y axis
+  ────────────────────────────────────────────────────────────── -->
+
+  <xacro:ultrasonic_eye
+    side="left"
+    parent_link="body_link"
+    xyz="${body_x/2.0 + 0.006}  0.018  ${body_z*0.15}"
+    rpy="0 ${pi/2} 0"/>
+
+  <xacro:ultrasonic_eye
+    side="right"
+    parent_link="body_link"
+    xyz="${body_x/2.0 + 0.006} -0.018  ${body_z*0.15}"
+    rpy="0 ${pi/2} 0"/>
+
+  <!-- ──────────────────────────────────────────────────────────
+       LEFT LEG ASSEMBLY
+  ────────────────────────────────────────────────────────────── -->
+
+  <!-- Servo block (cosmetic, fixed to body) -->
+  <xacro:servo_block
+    prefix="left_hip"
+    parent_link="body_link"
+    xyz="0 ${leg_offset_y} ${hip_z_in_body}"
+    rpy="0 0 0"/>
+
+  <!-- Hip revolute joint — rotates about Z (swing leg fore/aft) -->
+  <joint name="left_hip_joint" type="revolute">
+    <parent link="left_hip_servo"/>
+    <child  link="left_leg_link"/>
+    <origin xyz="0 0 ${-leg_z/2.0}" rpy="0 0 0"/>
+    <axis   xyz="0 0 1"/>
+    <limit  lower="${-servo_limit}" upper="${servo_limit}"
+            effort="${servo_eff}"   velocity="${servo_vel}"/>
+    <xacro:servo_dynamics/>
+  </joint>
+
+  <link name="left_leg_link">
+    <xacro:inertia_box m="${leg_mass}" x="${leg_x}" y="${leg_y}" z="${leg_z}"/>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${leg_x} ${leg_y} ${leg_z}"/>
+      </geometry>
+      <material name="otto_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${leg_x} ${leg_y} ${leg_z}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Foot revolute joint — rotates about Z (tilt foot) -->
+  <joint name="left_foot_joint" type="revolute">
+    <parent link="left_leg_link"/>
+    <child  link="left_foot_link"/>
+    <origin xyz="0 0 ${foot_z_in_leg - foot_h/2.0}" rpy="0 0 0"/>
+    <axis   xyz="0 0 1"/>
+    <limit  lower="${-servo_limit}" upper="${servo_limit}"
+            effort="${servo_eff}"   velocity="${servo_vel}"/>
+    <xacro:servo_dynamics/>
+  </joint>
+
+  <link name="left_foot_link">
+    <xacro:inertia_cylinder m="${foot_mass}" r="${foot_r}" h="${foot_h}"/>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${foot_r}" length="${foot_h}"/>
+      </geometry>
+      <material name="otto_grey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${foot_r}" length="${foot_h}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ──────────────────────────────────────────────────────────
+       RIGHT LEG ASSEMBLY  (mirror of left)
+  ────────────────────────────────────────────────────────────── -->
+
+  <xacro:servo_block
+    prefix="right_hip"
+    parent_link="body_link"
+    xyz="0 ${-leg_offset_y} ${hip_z_in_body}"
+    rpy="0 0 0"/>
+
+  <joint name="right_hip_joint" type="revolute">
+    <parent link="right_hip_servo"/>
+    <child  link="right_leg_link"/>
+    <origin xyz="0 0 ${-leg_z/2.0}" rpy="0 0 0"/>
+    <axis   xyz="0 0 1"/>
+    <limit  lower="${-servo_limit}" upper="${servo_limit}"
+            effort="${servo_eff}"   velocity="${servo_vel}"/>
+    <xacro:servo_dynamics/>
+  </joint>
+
+  <link name="right_leg_link">
+    <xacro:inertia_box m="${leg_mass}" x="${leg_x}" y="${leg_y}" z="${leg_z}"/>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${leg_x} ${leg_y} ${leg_z}"/>
+      </geometry>
+      <material name="otto_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${leg_x} ${leg_y} ${leg_z}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="right_foot_joint" type="revolute">
+    <parent link="right_leg_link"/>
+    <child  link="right_foot_link"/>
+    <origin xyz="0 0 ${foot_z_in_leg - foot_h/2.0}" rpy="0 0 0"/>
+    <axis   xyz="0 0 1"/>
+    <limit  lower="${-servo_limit}" upper="${servo_limit}"
+            effort="${servo_eff}"   velocity="${servo_vel}"/>
+    <xacro:servo_dynamics/>
+  </joint>
+
+  <link name="right_foot_link">
+    <xacro:inertia_cylinder m="${foot_mass}" r="${foot_r}" h="${foot_h}"/>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${foot_r}" length="${foot_h}"/>
+      </geometry>
+      <material name="otto_grey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${foot_r}" length="${foot_h}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ──────────────────────────────────────────────────────────
+       GAZEBO PLUGINS / TAGS  (uncomment if using Gazebo)
+  ────────────────────────────────────────────────────────────── -->
+  <!--
+  <gazebo reference="body_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <gazebo reference="left_leg_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <gazebo reference="right_leg_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <gazebo reference="left_foot_link">
+    <material>Gazebo/Grey</material>
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+  </gazebo>
+
+  <gazebo reference="right_foot_link">
+    <material>Gazebo/Grey</material>
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="joint_state_publisher"
+            filename="libgazebo_ros_joint_state_publisher.so">
+      <jointName>
+        left_hip_joint, left_foot_joint,
+        right_hip_joint, right_foot_joint
+      </jointName>
+    </plugin>
+  </gazebo>
+  -->
+
+</robot>

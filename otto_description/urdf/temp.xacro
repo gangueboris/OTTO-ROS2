@@ -1,0 +1,422 @@
+<?xml version="1.0"?>
+
+<!-- Root robot definition using Xacro -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="otto_robot">
+    
+    <!-- IMPORT MATERIALS/MACROS -->
+
+    <!-- Include external file (colors + inertial macro) -->
+    <xacro:include filename="otto_materials.xacro" />
+    
+    <!-- BASE LINK (ROBOT BODY) -->
+
+    <!-- Main body of the robot -->
+    <link name="base_link">
+
+        <!-- Visual appearance -->
+        <visual>
+            <!-- Position/orientation of the shape -->
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+
+            <!-- Shape of the robot body -->
+            <geometry>
+                <box size="0.10 0.10 0.08"/>
+            </geometry>
+
+            <!-- Color/material -->
+            <material name="grey"/>
+        </visual>
+
+        <!-- Collision shape (used for physics) -->
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.10 0.10 0.08"/>
+            </geometry>
+        </collision>
+
+        <!-- Physical properties (mass + inertia) using macro -->
+        <xacro:inertial_box mass="0.3" x="0.10" y="0.10" z="0.08">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_box>
+    </link>
+
+    <!-- MACRO: LEG DEFINITION -->
+    <!-- 
+        This macro creates one leg.
+        Parameters:
+        - prefix: name (left/right)
+        - reflect: +1 or -1 (to position left/right side)
+    -->
+    <xacro:macro name="otto_leg" params="prefix reflect">
+        
+        <!-- HIP JOINT -->
+
+        <!-- Joint connecting body to leg -->
+        <joint name="${prefix}_hip_joint" type="revolute">
+            <parent link="base_link"/>
+            <child link="${prefix}_leg_link"/>
+
+            <!-- Position: reflect moves leg left/right -->
+            <origin xyz="0 ${reflect * 0.025} -0.04" rpy="0 0 0"/>
+
+            <!-- Rotation axis (around X axis) -->
+            <axis xyz="1 0 0"/>
+
+            <!-- Motion limits -->
+            <limit lower="-1.0" upper="1.0" effort="1.5" velocity="2.0"/>
+        </joint>
+        
+        <!-- LEG LINK -->
+    
+        <!-- Upper leg part -->
+        <link name="${prefix}_leg_link">
+
+            <!-- Visual -->
+            <visual>
+                <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.03 0.02 0.04"/>
+                </geometry>
+                <material name="blue"/>
+            </visual>
+
+            <!-- Collision -->
+            <collision>
+                <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.03 0.02 0.04"/>
+                </geometry>
+            </collision>
+
+            <!-- Inertia -->
+            <xacro:inertial_box mass="0.05" x="0.03" y="0.02" z="0.04">
+                <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+            </xacro:inertial_box>
+        </link>
+        
+        <!-- ANKLE JOINT -->
+    
+        <!-- Joint connecting leg to foot -->
+        <joint name="${prefix}_ankle_joint" type="revolute">
+            <parent link="${prefix}_leg_link"/>
+            <child link="${prefix}_foot_link"/>
+
+            <!-- Positioned at bottom of leg -->
+            <origin xyz="0 0 -0.04" rpy="0 0 0"/>
+
+            <!-- Rotation axis (around Z axis) -->
+            <axis xyz="0 0 1"/>
+
+            <!-- Motion limits -->
+            <limit lower="-0.5" upper="0.5" effort="1.5" velocity="2.0"/>
+        </joint>
+        
+        <!-- FOOT LINK -->
+
+        <!-- Foot part -->
+        <link name="${prefix}_foot_link">
+
+            <!-- Visual -->
+            <visual>
+                <origin xyz="0 0 -0.01" rpy="0 0 0"/><?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="otto_robot">
+
+    <!-- Import utilities components -->
+    <xacro:include filename="otto_materials.xacro"/>
+
+    <!-- Referential link 'world' -->
+    <link name="world"></link>
+
+    <!-- The base origin is offset from the world origin. -->
+    <joint name="base_joint" type="fixed">
+        <origin xyz="1.5 1.0 0" rpy="0 0 0"/>
+        <parent link="world"/>
+        <child link="base_link"/>        
+    </joint>
+
+    <!-- Main body of the robot -->
+    <link name="base_link">
+        <visual>             <!-- Visual appearance -->
+            <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>  <!-- Position/orientation of the shape -->
+            <geometry>
+                <box size="0.09 0.09 0.07"/>        <!-- Shape of the robot body -->
+            </geometry>
+            <material name="grey"/>             <!-- Color/material -->
+        </visual>
+
+        <collision>   <!-- Collision shape (used for physics) -->
+            <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.10 0.10 0.08"/>      
+            </geometry>
+        </collision>
+
+        <xacro:inertial_box mass="0.3" x="0.09" y="0.09" z="0.07">
+            <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+        </xacro:inertial_box> 
+    </link>
+
+    <!-- Single Leg definition using MACRO -->
+    <!-- 
+        This macro creates one leg.
+        Parameters:
+        - prefix: name (left/right)
+        - reflect: +1 or -1 (to position left/right side)
+    -->
+    <xacro:macro name="otto_leg" params="prefix reflect">
+        <!-- Hip Joint -->
+        <joint name="${prefix}_hip_joint" type="fixed">
+            <parent link="base_link"/>
+            <child link="${prefix}_thigh_link"/>
+            <origin xyz="0 ${reflect * 0.025} -0.04" rpy="0.0 0.0 0.0"/>
+        </joint>
+
+        <!-- Thigh Link -->
+        <link name="${prefix}_thigh_link">
+            <visual>
+                <origin xyz="0.0 0.0 -0.02" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <box size="0.03 0.02 0.03"/>
+                </geometry>
+                <material name="blue"/>
+            </visual>
+            
+            <collision>
+                <origin xyz="0.0 0.0 -0.02" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <box size="0.03 0.02 0.03"/>
+                </geometry>
+            </collision>
+                
+            <xacro:inertial_box mass="0.05" x="0.03" y="0.02" z="0.03">
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            </xacro:inertial_box>
+        </link>
+
+        <!-- Knee Joint -->
+        <joint name="${prefix}_knee_joint" type="revolute">
+            <origin xyz="0.0 0.0 -0.04" rpy="0.0 0.0 0.0"/>
+            <parent link="${prefix}_thigh_link"/>
+            <child link="${prefix}_leg_link"/>
+            <axis xyz="1 0 0"/>
+            <limit lower="-${pi/2}" upper="${pi/2}" effort="1.5" velocity="2.0"/>
+        </joint>
+
+        <!-- Leg Link -->
+        <link name="${prefix}_leg_link">
+             <visual name="">
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <box size="0.02 0.02 0.025"/>
+                </geometry>
+                <material name="grey"/>
+            </visual>
+
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <box size="0.02 0.02 0.025"/>
+                </geometry>
+            </collision>
+
+            <xacro:inertial_box mass="0.4" x="0.02" y="0.02" z="0.025">
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            </xacro:inertial_box>
+        </link>
+
+        <!-- Ankle Joint -->
+        <joint name="${prefix}_ankle_joint" type="revolute">
+            <parent link="${prefix}_leg_link"/>
+            <child link="${prefix}_foot_link"/>
+            <origin xyz="0 0 -0.04" rpy="0 0 0"/>
+            <axis xyz="0 0 1"/>
+            <limit lower="-${pi/2}" upper="${pi/2}" effort="1.5" velocity="2.0"/>
+        </joint>
+
+        <!-- Foot Link -->
+        <link name="${prefix}_foot_link">
+            <visual>
+                <origin xyz="0.0 0.0 -0.01" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <cylinder radius="0.04" length="0.01"/>
+                </geometry>
+               <material name="blue"/>
+            </visual>
+            <collision>
+               <origin xyz="0.0 0.0 -0.01" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <cylinder radius="0.04" length="0.01"/>
+                </geometry>
+            </collision>
+            <xacro:inertial_box mass="0.1" x="0.08" y="0.08" z="0.01">
+                <origin xyz="0.0 0.0 -0.01" rpy="0.0 0.0 0.0"/>
+            </xacro:inertial_box>
+        </link>
+
+
+    </xacro:macro>
+
+    <!-- Create Left & Right legs -->
+    <xacro:otto_leg prefix="left" reflect="1"/>
+    <xacro:otto_leg prefix="right" reflect="-1"/>
+
+
+</robot>
+                <geometry>
+                    <cylinder radius="0.04" length="0.01"/>
+                </geometry>
+                <material name="grey"/>
+            </visual>
+
+            <!-- Collision -->
+            <collision>
+                <origin xyz="0 0 -0.01" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder radius="0.04" length="0.01"/>
+                </geometry>
+            </collision>
+
+            <!-- Inertia -->
+            <xacro:inertial_box mass="0.1" x="0.08" y="0.08" z="0.01">
+                <origin xyz="0 0 -0.01" rpy="0 0 0"/>
+            </xacro:inertial_box>
+        </link>
+
+    </xacro:macro>
+
+
+    <!-- CREATE LEFT & RIGHT LEGS -->
+
+    <!-- Left leg (positive Y direction) -->
+    <xacro:otto_leg prefix="left" reflect="1"/>
+
+    <!-- Right leg (negative Y direction) -->
+    <xacro:otto_leg prefix="right" reflect="-1"/>
+
+</robot>
+
+
+<!--================================= V2 ================================-->
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="otto_robot">
+
+    <!-- Import utilities components -->
+    <xacro:include filename="otto_materials.xacro"/>
+
+    <!-- Main body of the robot -->
+    <link name="base_link">
+        <visual>             <!-- Visual appearance -->
+            <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>  <!-- Position/orientation of the shape -->
+            <geometry>
+                <box size="0.09 0.09 0.07"/>        <!-- Shape of the robot body -->
+            </geometry>
+            <material name="grey"/>             <!-- Color/material -->
+        </visual>
+
+        <collision>   <!-- Collision shape (used for physics) -->
+            <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.10 0.10 0.08"/>      
+            </geometry>
+        </collision>
+
+        <xacro:inertial_box mass="0.3" x="0.09" y="0.09" z="0.07">
+            <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+        </xacro:inertial_box> 
+    </link>
+
+    <!-- Single Leg definition using MACRO -->
+    <!-- 
+        This macro creates one leg.
+        Parameters:
+        - prefix: name (left/right)
+        - reflect: +1 or -1 (to position left/right side)
+    -->
+    <xacro:macro name="otto_leg" params="prefix reflect">
+        
+        <joint name="${prefix}_hip_joint" type="revolute">
+            <parent link="base_link"/>
+            <child link="${prefix}_thigh_link"/>
+            <origin xyz="0 ${reflect * 0.025} -0.04" rpy="0.0 0.0 0.0"/>
+            <axis xyz="0 0 1"/> <limit lower="-${pi/2}" upper="${pi/2}" effort="1.5" velocity="2.0"/>
+        </joint>
+
+        <link name="${prefix}_thigh_link">
+            <visual>
+                <origin xyz="0.0 0.0 -0.015" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <box size="0.03 0.02 0.03"/>
+                </geometry>
+                <material name="blue"/>
+            </visual>
+            <collision>
+                <origin xyz="0.0 0.0 -0.015" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <box size="0.03 0.02 0.03"/>
+                </geometry>
+            </collision>
+            <xacro:inertial_box mass="0.05" x="0.03" y="0.02" z="0.03">
+                <origin xyz="0.0 0.0 -0.015" rpy="0.0 0.0 0.0"/>
+            </xacro:inertial_box>
+        </link>
+
+        <joint name="${prefix}_servo_mount_joint" type="fixed">
+            <origin xyz="0.0 0.0 -0.03" rpy="0.0 0.0 0.0"/>
+            <parent link="${prefix}_thigh_link"/>
+            <child link="${prefix}_leg_link"/>
+        </joint>
+
+        <link name="${prefix}_leg_link">
+             <visual>
+                <origin xyz="0.0 0.0 -0.0125" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <box size="0.02 0.02 0.025"/>
+                </geometry>
+                <material name="grey"/>
+            </visual>
+            <collision>
+                <origin xyz="0.0 0.0 -0.0125" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <box size="0.02 0.02 0.025"/>
+                </geometry>
+            </collision>
+            <xacro:inertial_box mass="0.4" x="0.02" y="0.02" z="0.025">
+                <origin xyz="0.0 0.0 -0.0125" rpy="0.0 0.0 0.0"/>
+            </xacro:inertial_box>
+        </link>
+
+        <joint name="${prefix}_ankle_joint" type="revolute">
+            <parent link="${prefix}_leg_link"/>
+            <child link="${prefix}_foot_link"/>
+            <origin xyz="0 0 -0.025" rpy="0 0 0"/>
+            <axis xyz="1 0 0"/> <limit lower="-${pi/2}" upper="${pi/2}" effort="1.5" velocity="2.0"/>
+        </joint>
+
+        <link name="${prefix}_foot_link">
+            <visual>
+                <origin xyz="0.0 0.0 -0.005" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <cylinder radius="0.04" length="0.01"/>
+                </geometry>
+               <material name="blue"/>
+            </visual>
+            <collision>
+               <origin xyz="0.0 0.0 -0.005" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <cylinder radius="0.04" length="0.01"/>
+                </geometry>
+            </collision>
+            <xacro:inertial_box mass="0.1" x="0.08" y="0.08" z="0.01">
+                <origin xyz="0.0 0.0 -0.005" rpy="0.0 0.0 0.0"/>
+            </xacro:inertial_box>
+        </link>
+
+    </xacro:macro>
+    
+    <!-- Create Left & Right legs -->
+    <xacro:otto_leg prefix="left" reflect="1"/>
+    <xacro:otto_leg prefix="right" reflect="-1"/>
+
+
+</robot>

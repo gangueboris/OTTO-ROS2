@@ -1,0 +1,112 @@
+
+# 1. Create a new directory for your workspace along with a 'src' folder inside it
+mkdir -p ~/ros2_ws/src
+
+# 2. Navigate into the root of your new workspace
+cd ~/ros2_ws
+
+# 3. Build the empty workspace using colcon 
+colcon build
+
+# 4. Source the new setup file so your terminal recognizes the workspace
+source install/setup.bash
+
+# 5. Create a package 
+cd ~/ros2_ws/src
+ros2 pkg create --build-type ament_python py_pubsub
+
+# Setup the Publisher / Subscriber
+- Create a node class in src/package_name
+- Add dependencies: 
+In package.xml, add used in your node code <exec_depend>rclpy</exec_depend>; <exec_depend>std_msgs</exec_depend>
+
+- Add en entry point:
+In setup.py and add in entry_points "Node_name = pkg_name.node_file_name:main",
+
+- Build the package:
+  cd
+  'colcon build --packages-select pkg_name"
+  Open new terminal & 'source install/setup.bash'
+  Run the node 'ros2 run pkg_name node_name_from_setup'
+
+- Run a launch file: ros2 launch <package_name> <launch_file_name>
+
+# Requirement installation
+sudo apt update
+sudo apt install ros-jazzy-tf2-ros ros-jazzy-tf2-tools ros-jazzy-rviz2 ros-jazzy-urdf ros-jazzy-xacro
+sudo apt install ros-jazzy-robot-state-publisher ros-jazzy-joint-state-publisher-gui
+sudo apt install ros-jazzy-ros-gz
+
+joint_state_publisher_gui: generate sliders to mimike physical motors and broadcast fake joint state.
+robot_state_publisher : constantly listening to URDF file and the joint states coming from the GUI/real motor to perform a *forward Kinematics* then publish the final 3D coordinates to /robot_description.
+
+# URDF
+1. Link tags
+<link name="arm_link">
+    <visual>
+        <geometry>
+        <origin>
+        <material>
+    </visual>
+
+    <collision>
+        <geometry>
+        <origin>
+    </collision>
+
+    <inertial>
+        <mass>
+        <origin>
+        <inertia>
+    </inertial>
+</link>
+2. Joint tags
+*Types* : fixed, primastc, revolute and continuous
+<joint name="arm_joint" type="revolute">
+    <parent link="slider_link">
+    <child link="arm_link">
+    <origin xyz="0.25 0 0.15" rpy="0 0 0">
+    <axis xyz="0 -1 0">
+    <limit lower="0" upper="${pi/2}" velocity="100" effort="100">
+</joint>
+
+We create a different package for the URDF with ament_cmake intead of ament_python because here! Even though you are writing Python nodes for your logic, description packages are almost always built with CMake
+``ros2 pkg create --build-type ament_cmake otto_description``
+``cd otto_description``
+``mkdir urdf meshes launch rviz``
+
+otto_ws/src/otto_description/
+├── CMakeLists.txt      # Build instructions (tells ROS to copy these folders)
+├── package.xml         # Package dependencies (depends on urdf, xacro)
+├── launch/
+│   └── display.launch.py  # The launch file to open RViz and Robot State Publisher
+├── meshes/
+│   └── (empty for now)    # Where you will drop your 3D CAD files (.stl or .dae) later
+├── rviz/
+│   └── urdf_config.rviz   # Saves your RViz camera angles and background colors
+└── urdf/
+    ├── otto.urdf.xacro    # <-- THIS is where your master URDF file goes!
+    └── otto_core.xacro    # (Optional) Sub-files if you break the URDF into pieces
+
+
+# How to run Robot_descrtion package
+1. Build the package with colcon.
+2. Launch the robot_state_publisher launch file with ros2 launch otto_description otto.launch.py.
+3. Launch joint_state_publisher_gui with ros2 run joint_state_publisher_gui joint_state_publisher_gui. 
+4. Launch RViz with rviz2
+
+To replicate the RViz display shown in the video you will want to
+
+Set your fixed frame to world
+Add a RobotModel display, with the topic set to /robot_description, and alpha set to 0.8
+Add a TF display with names enabled.
+
+# URDF Modeling
+1. Draw on a paper to get an idea of what I want to build, with dimensions.
+2. Identify joint points in the model
+3. I identify parent and child relationship: The Rule of Thumb: If I hold part A still, and move part B, part B is the child.
+4. In the urdf modeling, always start from the base_link. And each link is automatically follow by a joint tag.
+Joint tag always has as name the child name
+
+After have modelize the the robot using boxes, to find the correct joint points and their rotations, you have to take your time to find
+the right axis rotation of the joint and validate the desire motion of the model. 
