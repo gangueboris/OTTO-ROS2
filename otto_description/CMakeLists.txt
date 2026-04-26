@@ -23,9 +23,9 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-# To ensure ROS 2 copies all your URDFs and meshes when I run colcon build
+# To ensure ROS2 copies all URDFs and meshes when I run colcon build
 install(
-  DIRECTORY urdf meshes launch rviz
+  DIRECTORY urdf meshes launch rviz config
   DESTINATION share/${PROJECT_NAME}
 )
 ament_package()

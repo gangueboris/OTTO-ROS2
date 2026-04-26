@@ -6,9 +6,7 @@
        otto_materials.xacro
        ============================================================ -->
 
-  <!-- ──────────────────────────────────────────────────────────
-       COLORS / MATERIALS
-  ────────────────────────────────────────────────────────────── -->
+  <!--==== COLORS / MATERIALS ====-->
 
   <material name="otto_blue">
     <color rgba="0.18 0.52 0.80 1.0"/>
@@ -30,11 +28,9 @@
     <color rgba="0.05 0.05 0.05 1.0"/>
   </material>
 
-  <!-- ──────────────────────────────────────────────────────────
-       INERTIA MACROS  (solid primitives)
-  ────────────────────────────────────────────────────────────── -->
+  <!--==== INERTIA MACROS  (solid primitives) ====-->
 
-  <!-- Solid box  m [kg], x/y/z [m] -->
+  <!-- Solid box  m [kg], x/y/z [m] (Dimension) -->
   <xacro:macro name="inertia_box" params="m x y z">
     <inertial>
       <mass value="${m}"/>
@@ -73,39 +69,36 @@
     </inertial>
   </xacro:macro>
 
-  <!-- ──────────────────────────────────────────────────────────
-       DEFAULT DYNAMICS MACRO
-       Apply to every revolute joint that drives a servo
-  ────────────────────────────────────────────────────────────── -->
+  <!-- DEFAULT DYNAMICS MACRO: Apply to every revolute joint that drives a servo -->
 
   <xacro:macro name="servo_dynamics">
     <dynamics damping="0.01" friction="0.001"/>
   </xacro:macro>
 
-  <!-- ──────────────────────────────────────────────────────────
+  <!-- 
        SERVO GEOMETRY MACRO
-       Represents a generic SG90/MG90 servo block
+       Represents a generic MG90 servo block
        parent_link : link to which the servo body is attached
-       prefix      : unique name prefix  (e.g. "left_hip")
+       prefix      : unique name prefix  ("left_hip")
        xyz / rpy   : pose in parent frame
-  ────────────────────────────────────────────────────────────── -->
+   -->
 
   <xacro:macro name="servo_block" params="prefix parent_link xyz rpy">
 
     <!-- Servo body -->
     <link name="${prefix}_servo">
-      <xacro:inertia_box m="0.009" x="0.023" y="0.012" z="0.025"/>
+      <xacro:inertia_box m="0.009" x="0.023" y="0.012" z="0.032"/>
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <box size="0.023 0.012 0.025"/>
+          <box size="0.023 0.012 0.032"/>
         </geometry>
         <material name="otto_dark_grey"/>
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <box size="0.023 0.012 0.025"/>
+          <box size="0.023 0.012 0.032"/>
         </geometry>
       </collision>
     </link>
@@ -118,12 +111,12 @@
 
   </xacro:macro>
 
-  <!-- ──────────────────────────────────────────────────────────
+  <!-- 
        ULTRASONIC SENSOR MACRO  (HC-SR04 style — the "eyes")
        parent_link : body/head link
        side        : "left" | "right"
        xyz / rpy   : pose in parent frame
-  ────────────────────────────────────────────────────────────── -->
+     -->
 
   <xacro:macro name="ultrasonic_eye" params="side parent_link xyz rpy">
 

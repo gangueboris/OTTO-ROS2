@@ -89,7 +89,7 @@ otto_ws/src/otto_description/
     └── otto_core.xacro    # (Optional) Sub-files if you break the URDF into pieces
 
 
-# How to run Robot_descrtion package
+# How to run Robot_description package
 1. Build the package with colcon.
 2. Launch the robot_state_publisher launch file with ros2 launch otto_description otto.launch.py.
 3. Launch joint_state_publisher_gui with ros2 run joint_state_publisher_gui joint_state_publisher_gui. 
@@ -103,6 +103,7 @@ Add a TF display with names enabled.
 
 # URDF Modeling
 1. Draw on a paper to get an idea of what I want to build, with dimensions.
+When hand designing the model before the urdf modeling, it helpful the know the dimensions & specifications of each component.
 2. Identify joint points in the model
 3. I identify parent and child relationship: The Rule of Thumb: If I hold part A still, and move part B, part B is the child.
 4. In the urdf modeling, always start from the base_link. And each link is automatically follow by a joint tag.
@@ -112,10 +113,21 @@ After have modelize the the robot using boxes, to find the correct joint points 
 the right axis rotation of the joint and validate the desire motion of the model. 
 
 # Gazebo
+What is Gazebo ? 
+How does works ?
+Gazebo plugins ?
+What are they fondamentals knowledge I need to have to understand Gazebo Harmonic ?
+
 How working with Gazebo looks like ?
 1. Start Gazebo Harmonic using ros_gz_sim package
 2. Spawn Otto: Taking the URDF that RSP processed and injecting it into the Gazebo sim.
 3. Sync the clocks: Telling ROS2 to use Gazebo simulated time (use_sim_time: True)
 And we can do all of that in a launch file.
 
-
+# ros2_control
+It is a standard ROS2 framework which bridges software commands with hardware simulation.
+How to setup the ros2_control ?
+- Add the ros2_control tag in the main urdf file.
+- Add the gz_ros2_control plugin to Gazebo in to the main urdf file
+- Create a controller .yaml config file: to sets up a joint_trajector_controller (for smooth walking animations)
+- Update the launch file
