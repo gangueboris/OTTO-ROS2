@@ -31,7 +31,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': '-r empty.sdf'}.items(),                   # -r : run, empty.sdf: the world to load
+        launch_arguments={'gz_args': '-r empty.sdf', 'on_exit_shutdown': 'true'}.items(),                   # -r : run, empty.sdf: the world to load
     )
 
     # Spawn the Robot in Gazebo
@@ -46,7 +46,7 @@ def generate_launch_description():
         ]
     )
 
-    # Bridge the Simulation Clock to ROS2 # It is taking a message from Gazebo, reformatting it, and publishing it to ROS 2, and vice versa.
+    # Bridge the Simulation Clock to ROS2 # It is taking any message from Gazebo, reformatting it, and publishing it to ROS 2, and vice versa.
     bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',

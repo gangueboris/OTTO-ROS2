@@ -147,3 +147,25 @@ Todo:
 - Design and setup some sensors
 
 - The yaml file create in the setup is used to specify the geometry of robots and some other properties.
+The yaml file is used to bridge the topic of ROS2 and Gazebo because ROS2 has it own topic and Gazebo has it own.
+
+## ROS2_Gazebo Bridging
+We have two ways to bridge ROS2 and Gazebo. We can do it in a node (inline) or in a yaml file.
+In the launch file, we create a node with the package 'ros_gz_bridge' and in the arguments session, we can write inline the kind of bridge (clock, controller, jsp...) or we can pass a .yaml file where we wrote all the bridge.
+
+## gz_ros2_control
+When using gz_ros2_control plugin, it creates a seamless, internal bridge between Gazebo and ROS 2 specifically for motor commands and joint states. So we don't have to write in the yaml file.
+
+ros2 control list_hardware_interfaces
+
+ros2 run otto_description otto_teleop.py
+
+## For walking robot
+We are using: JointTrajectoryPoint
+
+## For rolling
+It will be diff_drive_controller
+
+## rqt Joint Trajectory Controller
+sudo apt install ros-jazzy-rqt-joint-trajectory-controller
+rqt : It launch the gui joint interface like in rviz2.

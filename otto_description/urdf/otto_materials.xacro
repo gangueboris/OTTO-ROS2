@@ -87,18 +87,18 @@
 
     <!-- Servo body -->
     <link name="${prefix}_servo">
-      <xacro:inertia_box m="0.009" x="0.023" y="0.012" z="0.032"/>
+      <xacro:inertia_box m="0.009" x="0.023" y="0.012" z="0.045"/>
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <box size="0.023 0.012 0.032"/>
+          <box size="0.023 0.012 0.045"/>
         </geometry>
         <material name="otto_dark_grey"/>
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <box size="0.023 0.012 0.032"/>
+          <box size="0.023 0.012 0.045"/>
         </geometry>
       </collision>
     </link>

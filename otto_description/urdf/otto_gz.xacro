@@ -55,7 +55,7 @@
     <!-- Gazebo's Plugins -->
     <gazebo>
       <!-- gz-sim-joint-state-publisher-system -->
-      <!-- JointStatePublisher : Measures the joints in Gazebo frequently -> sends to /joint_states via the bridge -> 
+      <!-- JointStatePublisher: Measures the joints in Gazebo frequently -> sends to /joint_states via the bridge -> 
       ROS 2 uses Forward Kinematics to calculate the robot's current physical posture.
        -->
       <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
@@ -69,7 +69,7 @@
       <!-- gz_ros2_control -->
       <!-- gz_ros2_control listen to the logic (Inverse Kinematics) from ROS2 and translate it to the simulation to move the robot. -->
       <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-        <parameters>$(find otto_description)/config/controllers.yaml</parameters>
+        <parameters>$(find otto_description)/config/controllers.yaml</parameters>    <!-- Load the yaml file to gazebo. -->
       </plugin>
     </gazebo>
 
@@ -105,3 +105,4 @@
       </joint>
     </ros2_control>
   </robot>
+  
