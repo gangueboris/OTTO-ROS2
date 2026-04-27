@@ -30,7 +30,7 @@
 
   <!-- ── Include utilities ── -->
   <xacro:include filename="otto_materials.xacro" />
-
+  <xacro:include filename="otto_gz.gazebo" />
   <!--==== PHYSICAL PARAMETERS ====-->
 
   <!-- Body / head combined box -->
@@ -248,104 +248,4 @@
       </geometry>
     </collision>
   </link>
-
-  <!-- GAZEBO PLUGINS / TAGS -->
-  <gazebo reference="body_link">
-    <visual>
-      <material>
-        <ambient>0.18 0.52 0.80 1.0</ambient>
-        <diffuse>0.18 0.52 0.80 1.0</diffuse>
-      </material>
-    </visual>
-  </gazebo>
-
-  <gazebo reference="left_leg_link">
-    <visual>
-      <material>
-        <ambient>0.18 0.52 0.80 1.0</ambient>
-        <diffuse>0.18 0.52 0.80 1.0</diffuse>
-      </material>
-    </visual>
-  </gazebo>
-
-  <gazebo reference="right_leg_link">
-    <visual>
-      <material>
-        <ambient>0.18 0.52 0.80 1.0</ambient>
-        <diffuse>0.18 0.52 0.80 1.0</diffuse>
-      </material>
-    </visual>
-  </gazebo>
-
-  <gazebo reference="left_foot_link">
-    <mu1>0.9</mu1>
-    <mu2>0.9</mu2>
-    <visual>
-      <material>
-        <ambient>0.65 0.65 0.65 1.0</ambient>
-        <diffuse>0.65 0.65 0.65 1.0</diffuse>
-      </material>
-    </visual>
-  </gazebo>
-
-  <gazebo reference="right_foot_link">
-    <mu1>0.9</mu1>
-    <mu2>0.9</mu2>
-    <visual>
-      <material>
-        <ambient>0.65 0.65 0.65 1.0</ambient>
-        <diffuse>0.65 0.65 0.65 1.0</diffuse>
-      </material>
-    </visual>
-  </gazebo>
-
-  <!-- Gazebo's Plugins -->
-  <gazebo>
-    <!-- gz-sim-joint-state-publisher-system -->
-    <plugin filename="gz-sim-joint-state-publisher-system"
-            name="gz::sim::systems::JointStatePublisher">
-      <topic>joint_states</topic>
-      <joint_name>left_hip_joint</joint_name>
-      <joint_name>left_foot_joint</joint_name>
-      <joint_name>right_hip_joint</joint_name>
-      <joint_name>right_foot_joint</joint_name>
-    </plugin>
-
-    <!-- gz_ros2_control -->
-    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-      <parameters>$(find otto_description)/config/controllers.yaml</parameters>
-    </plugin>
-  </gazebo>
-
-
-  <!-- ROS2_control Specifications -->
-  <ros2_control name="GazeboSimSystem" type="system">
-    <hardware>
-      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
-    </hardware>
-
-    <joint name="left_hip_joint">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-
-    <joint name="left_foot_joint">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-
-    <joint name="right_hip_joint">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-
-    <joint name="right_foot_joint">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-    </joint>
-  </ros2_control>
 </robot>

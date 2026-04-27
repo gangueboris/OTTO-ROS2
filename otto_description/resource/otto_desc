@@ -131,3 +131,19 @@ How to setup the ros2_control ?
 - Add the gz_ros2_control plugin to Gazebo in to the main urdf file
 - Create a controller .yaml config file: to sets up a joint_trajector_controller (for smooth walking animations)
 - Update the launch file
+
+
+
+
+
+
+
+======================================================================================================================================
+Todo:
+- Never use IA to write a code where you copy paste, this approach is waisting time. Try things by you own.
+
+- Learn about Gazebo plugins
+- Learn about ros2_control
+- Design and setup some sensors
+
+- The yaml file create in the setup is used to specify the geometry of robots and some other properties.
