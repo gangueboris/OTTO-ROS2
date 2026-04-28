@@ -50,8 +50,8 @@
   <xacro:property name="foot_h"    value="0.008"/>
   <xacro:property name="foot_mass" value="0.020"/>
 
-  <!-- Servo joint limits (±40° realistic for Otto walk) -->
-  <xacro:property name="servo_limit" value="0.78"/>   <!-- rad, ~40° -->
+  <!-- Servo joint limits (±360° realistic for Otto walk) -->
+  <xacro:property name="servo_limit" value="3.14"/>   <!-- rad, ~360° -->
   <xacro:property name="servo_vel"   value="3.14"/>     <!-- rad/s     -->
   <xacro:property name="servo_eff"   value="0.5"/>      <!-- N·m       -->
 
@@ -131,7 +131,7 @@
     xyz="0 ${leg_offset_y} ${hip_z_in_body}"
     rpy="0 0 0"/>
 
-  <!-- Hip revolute joint — rotates about Z (swing leg fore/aft) -->
+  <!-- Hip revolute joint — rotates about X (swing leg fore/aft) -->
   <joint name="left_hip_joint" type="revolute">
     <parent link="left_hip_servo"/>
     <child  link="left_leg_link"/>
@@ -165,7 +165,7 @@
     <child  link="left_foot_link"/>
     <origin xyz="0 0 ${foot_z_in_leg - foot_h/2.0}" rpy="0 0 0"/>
     <axis   xyz="0 0 1"/>
-    <limit  lower="${-servo_limit}" upper="${servo_limit}"
+    <limit  lower="${-servo_limit/2}" upper="${servo_limit/2}"
             effort="${servo_eff}"   velocity="${servo_vel}"/>
     <xacro:servo_dynamics/>
   </joint>
@@ -227,7 +227,7 @@
     <child  link="right_foot_link"/>
     <origin xyz="0 0 ${foot_z_in_leg - foot_h/2.0}" rpy="0 0 0"/>
     <axis   xyz="0 0 1"/>
-    <limit  lower="${-servo_limit}" upper="${servo_limit}"
+    <limit  lower="${-servo_limit/2}" upper="${servo_limit/2}"
             effort="${servo_eff}"   velocity="${servo_vel}"/>
     <xacro:servo_dynamics/>
   </joint>
