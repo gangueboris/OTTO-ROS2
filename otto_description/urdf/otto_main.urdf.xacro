@@ -67,7 +67,6 @@
   <xacro:property name="foot_z_in_leg"    value="${-leg_z/2.0}"/>
 
   <!--=== BASE LINK  (world / floor anchor, mass-less) ===-->
-
   <link name="base_link"/>
 
   <!--=== BODY / HEAD LINK ===-->

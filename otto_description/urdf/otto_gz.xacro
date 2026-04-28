@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <!-- GAZEBO PLUGINS / TAGS -->
+  <!-- GAZEBO PLUGINS -->
   <!-- Color setting -->
     <gazebo reference="body_link">
       <visual>
         <material>
-          <ambient>0.18 0.52 0.80 1.0</ambient>       <!-- Lighting: t dictates what the object looks like when it is in the shadows -->
+          <ambient>0.18 0.52 0.80 1.0</ambient>       <!-- Lighting: dictates what the object looks like when it is in the shadows -->
           <diffuse>0.18 0.52 0.80 1.0</diffuse>       <!-- Color : object reflects when a direct light source (like the sun or a spotlight) hits it.-->
         </material>
       </visual>

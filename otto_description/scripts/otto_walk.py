@@ -29,14 +29,10 @@ class OttoWalk(Node):
         LEAN_INNER = 0.65   # hip angle for the loaded (inner) leg
         PIVOT      = 0.52   # foot twist angle
 
-        # fmt: off
         # Each entry: ([positions], duration_sec, description)
         # Positions: [left_hip, left_foot, right_hip, right_foot]
-        # "-" from your table = carry previous value (handled by keeping last pos)
-        # Left step  → left foot twists NEGATIVE
-        # Right step → right foot twists POSITIVE  (opposite sign!)
         self.gait_sequence = [
-            # ── LEFT STEP ──────────────────────────────────────────────────────
+            # LEFT STEP 
             # Lean: load left foot, right leg lifts
             ([ LEAN_INNER,  0.0,  LEAN_OUTER,  0.0],   self.SPEED_LEAN,   "Lean left"),
 
@@ -46,7 +42,7 @@ class OttoWalk(Node):
             # Down: everything neutral, both feet planted
             ([ 0.0,        -PIVOT, 0.0,         0.0],   self.SPEED_CENTER, "Down — plant right"),
 
-            # ── RIGHT STEP ─────────────────────────────────────────────────────
+            # RIGHT STEP 
             # Lean: load right foot, left leg lifts
             ([-LEAN_OUTER,  0.0, -LEAN_INNER,  0.0],   self.SPEED_LEAN,   "Lean right"),
 
@@ -56,9 +52,6 @@ class OttoWalk(Node):
             # Down: everything neutral, both feet planted
             ([ 0.0,         0.0,  0.0,        +PIVOT],  self.SPEED_CENTER, "Down — plant left"),
         ]
-
-       
-        # fmt: on
 
         self.step_index = 0
         # Start timer with first phase duration

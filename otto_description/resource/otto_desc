@@ -160,12 +160,71 @@ ros2 control list_hardware_interfaces
 
 ros2 run otto_description otto_teleop.py
 
-## For walking robot
+# For walking robot
 We are using: JointTrajectoryPoint
+The idea here is to make the robot walks in the simulation without falling and mimicking OTTO walk&roll walk.
+So how to achieve that ?
+First of all, I will a tool in the simulation which allows me to control the robot.
+By doing some research I found multiple ways of control. But the mains controller found interesting at this of the project are programmic control via a node, telop control via keyboard / teleoperation (remote ctrl) and manual control using rqt.
+
+I begun with the manual ctrl (rqt). Since I don't know how to make the robot walk like wanted, I started manual to understand how the ros2 joints fonction by using joint_trajectory_controller. I tried to perform the walking robot manually while logging each state and undertand how the robot should perform each step. By doing that, I found the principle loop to perform a step. This manual approach allowed me to find the working sequence for the robot to walk: ean → pivot → center → lean other way → pivot → center.
+
+Then I moved on programmic ctrl, I create a node and write the logic in a continuous loop to verify if the robot is able to walk on long distance, by performing the right steps and not falling.
+
+| | Previous code | This version |
+|---|---|---|
+| Gait phases | 4 (tilt+swing combined) | 6 (lean → pivot → center × 2) |
+| Hip role assumed | fore/aft swing | lateral lean ✓ |
+| Foot role assumed | lateral tilt | forward pivot ✓ |
+| "Down" / replant step | missing | explicit, faster timing |
+| Phase timing | uniform `SPEED` | lean=0.8s, center=0.4s |
+| Foot state during lean | reset to 0 | explicitly zeroed before next pivot |
+
+By using that approach, I faced some issues, the robot was difting, walking in circle. And it was due to the fact that LEAN_INNER and LEAN_OUTER are not balanced.
+I also faces some frictions issues: 
+# Phase 5: Pivot right foot — but right_hip is STILL at -LEAN_INNER!
+([-LEAN_OUTER, 0.0, -LEAN_INNER, +PIVOT], ...)
+The right foot was planted and loaded (body weight on it from the lean) and I was trying to twist it while the hip is actively pressing down on it with -LEAN_INNER. The friction force in Gazebo was resisting the twist.
+
+Now that I successfully made the robot walk, I would want now to remote control his walk via remote phone controller like in real life. So I will use the teleop controller.
+In order to complete the "SIMULATION", I will set up a web interface where I will build the exact same architecture I will use later for the ESP32. Since the ESP32 is just a tiny web server that hosts an HTML page listens to button presses over WIFI. I can simulate that exact behaviour right now using my PC (for the web host, future Pi4) and my phone (remote controller).
+How to do that ?
+I will use a standard ROS2 tool called ``rosbridge_suite``. It creates a webSocket server that allows standard web pages to talk directly to ROS2 topics.
+1.Web Bridge installation
+``sudo apt update ``
+``sudo apt install ros-jazzy-rosbridge-server``
+
+2. Create a web app
+- Use the computer local wifi ip addres: `ipconfig` on main laptop
+- Write the teleop script
+My current setup was: Phone → WiFi → Windows → WSL → ROS2
+- Run the python node: `ros2 run otto_description otto_teleop.py`
+- Websocket: `ros2 run rosbridge_server rosbridge_websocket`
+
+## Connectioning phone issues because of wsl firewall
+- Run in window powershell: `cd \\wsl.localhost\Ubuntu\home\boris\otto_ws\src\OTTO-ROS2\web`
+then :  Run the web server : `python3 -m http.server 8000`
+
+# port forwarding (portproxy)
+- `netsh interface portproxy add v4tov4 listenport=9090 listenaddress=0.0.0.0 connectport=9090 connectaddress=172.21.174.123` 172.21.174.123 is wsl ip address abtained by ip a. NB wsl ip a changes so update the config.
+- Not block the firewall: `netsh advfirewall firewall add rule name="ROS Bridge Port 9090" dir=in action=allow protocol=TCP localport=9090`
+
 
 ## For rolling
 It will be diff_drive_controller
 
 ## rqt Joint Trajectory Controller
-sudo apt install ros-jazzy-rqt-joint-trajectory-controller
+sudo apt install ros-jazzy-rqt-joint-trajectory-controller   :  which accepts Position commands (Angles).
 rqt : It launch the gui joint interface like in rviz2.
+
+# TODO
+- Read urdf and correct comments
+- Read and understand index.html and the otto_telop.py
+- Update the crtl interface by turning into ajoystick.
+- Design and implement the web ctrl interface
+- Write the logic the new ctrl
+
+- Before attacking the roll, I must add the two stabilizer on both side.
+diff_drive_controller (Differential Drive).
+
+This controller accepts Velocity commands (e.g., "Drive forward at 1 meter per second")
