@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <title>Otto Remote</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+
+    <style>
+        body { font-family: Arial; text-align: center; background-color: #2c3e50; color: white; padding-top: 50px; }
+        .btn { display: block; width: 80%; height: 100px; margin: 20px auto; font-size: 30px; 
+               border-radius: 15px; border: none; font-weight: bold; }
+        .btn-walk { background-color: #27ae60; color: white; }
+        .btn-stop { background-color: #e74c3c; color: white; }
+        .btn-kick { background-color: #f39c12; color: white; }
+        .btn:active { opacity: 0.7; }
+        #status { color: #f1c40f; margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <h1>🤖 Otto Remote</h1>
+    <h3 id="status">Connecting to ROS 2...</h3>
+
+    <button class="btn btn-walk" onclick="sendCommand('walk')">🚶 WALK</button>
+    <button class="btn btn-stop" onclick="sendCommand('stop')">🛑 STOP</button>
+    <button class="btn btn-kick" onclick="sendCommand('kick')">⚽ KICK</button>
+
+    <script type="text/javascript">
+        // 1. Connect to the ROSBridge Server
+        // REPLACE THIS WITH YOUR PC's WI-FI IP ADDRESS!
+        var ros = new ROSLIB.Ros({
+            url : 'ws://10.172.61.178:9090' 
+        });
+
+        ros.on('connection', function() {
+            document.getElementById("status").innerHTML = "🟢 Connected!";
+            document.getElementById("status").style.color = "#2ecc71";
+        });
+
+        ros.on('error', function(error) {
+            document.getElementById("status").innerHTML = "🔴 Error connecting.";
+            document.getElementById("status").style.color = "#e74c3c";
+        });
+
+        // 2. Define the ROS Topic we want to talk to
+        var cmdTopic = new ROSLIB.Topic({
+            ros : ros,
+            name : '/otto_command',
+            messageType : 'std_msgs/msg/String'
+        });
+
+        // 3. Send the command when a button is pressed
+        function sendCommand(action) {
+            var msg = new ROSLIB.Message({ data: action });
+            cmdTopic.publish(msg);
+            console.log("Sent: " + action);
+        }
+    </script>
+</body>
+</html>
