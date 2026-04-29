@@ -118,7 +118,6 @@
      -->
 
   <xacro:macro name="ultrasonic_eye" params="side parent_link xyz rpy">
-
     <link name="${side}_eye">
       <xacro:inertia_cylinder m="0.003" r="0.008" h="0.012"/>
       <visual>
@@ -141,7 +140,5 @@
       <child  link="${side}_eye"/>
       <origin xyz="${xyz}" rpy="${rpy}"/>
     </joint>
-
   </xacro:macro>
-
 </robot>
