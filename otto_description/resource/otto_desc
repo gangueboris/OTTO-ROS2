@@ -217,11 +217,19 @@ It will be diff_drive_controller
 sudo apt install ros-jazzy-rqt-joint-trajectory-controller   :  which accepts Position commands (Angles).
 rqt : It launch the gui joint interface like in rviz2.
 
+### The Theory of the 4 Directions
+Think of Otto's feet like the two treads on a tank:
+
+Forward: Left foot twists negative, Right foot twists positive.
+
+Backward: We reverse the pivots. Left foot twists positive, Right foot twists negative.
+
+Turn Left: Both feet twist in the same negative direction. (This is exactly the "turning in circles" bug you accidentally discovered earlier—now we are using it on purpose!)
+
+Turn Right: Both feet twist in the same positive direction.
+
 # TODO
 - Read urdf and correct comments
-- Read and understand index.html and the otto_telop.py
-- Update the crtl interface by turning into ajoystick.
-- Design and implement the web ctrl interface
 - Write the logic the new ctrl
 
 - Before attacking the roll, I must add the two stabilizer on both side.

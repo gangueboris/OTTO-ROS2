@@ -1,18 +1,18 @@
 
 ## 0. Create a workspace
-# 1. Create a new directory for your workspace along with a 'src' folder inside it
+## 1. Create a new directory for your workspace along with a 'src' folder inside it
 mkdir -p ~/ros2_ws/src
 
-# 2. Navigate into the root of your new workspace
+## 2. Navigate into the root of your new workspace
 cd ~/ros2_ws
 
-# 3. Build the empty workspace using colcon 
+## 3. Build the empty workspace using colcon 
 colcon build
 
-# 4. Source the new setup file so your terminal recognizes the workspace
+## 4. Source the new setup file so your terminal recognizes the workspace
 source install/setup.bash
 
-# ROS 2 Jazzy: Beginner's Command Cheat Sheet
+## ROS 2 Jazzy: Beginner's Command Cheat Sheet
 
 This guide covers the essential commands needed to navigate, build, and troubleshoot a ROS 2 workspace, with a specific focus on Python development.
 
@@ -106,13 +106,13 @@ Nodes communicate by sending messages over "topics".
     ```
     *Example:* `ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5}, angular: {z: 0.5}}"`
 
-    # 1. Go to your native Linux home directory
+## 1. Go to your native Linux home directory
 cd ~
 
-# 2. Create a new workspace folder, and a 'src' folder inside it
+## 2. Create a new workspace folder, and a 'src' folder inside it
 mkdir -p ~/ros2_ws/src
 
-# 3. Move into the 'src' folder (where your packages will live)
+## 3. Move into the 'src' folder (where your packages will live)
 cd ~/ros2_ws/src
 
 
