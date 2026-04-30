@@ -1,3 +1,4 @@
+from launch.actions import TimerAction
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -74,11 +75,35 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Spawn the Differential Drive Controller ASLEEP
+    diff_drive_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["diff_drive_controller", "--inactive", "--ros-args", "-p", "use_sim_time:=true"],
+    )
+
+    hip_spawner = Node(package="controller_manager",
+        executable="spawner",
+        arguments=["hip_controller", "--ros-args", "-p", "use_sim_time:=true"])
+    
+    foot_spawner = Node(package="controller_manager",
+        executable="spawner",
+        arguments=["foot_controller", "--ros-args", "-p", "use_sim_time:=true"])
+
+
+
     return LaunchDescription([
         node_robot_state_publisher,
         gazebo,
         spawn_entity,
         bridge,
         spawn_jsb,
-        spawn_jtc
+        spawn_jtc,
+        # Boot Walking Muscles
+        TimerAction(period=2.0, actions=[hip_spawner, foot_spawner]),
+        
+        # Boot Driving Muscles (Asleep)
+        TimerAction(period=4.0, actions=[diff_drive_spawner])
     ])
+
+     

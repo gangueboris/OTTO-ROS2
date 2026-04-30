@@ -205,7 +205,7 @@ My current setup was: Phone → WiFi → Windows → WSL → ROS2
 - Run in window powershell: `cd \\wsl.localhost\Ubuntu\home\boris\otto_ws\src\OTTO-ROS2\web`
 then :  Run the web server : `python3 -m http.server 8000`
 
-# port forwarding (portproxy)
+# port forwarding (portproxy) Admin cmd
 - `netsh interface portproxy add v4tov4 listenport=9090 listenaddress=0.0.0.0 connectport=9090 connectaddress=172.21.174.123` 172.21.174.123 is wsl ip address abtained by ip a. NB wsl ip a changes so update the config.
 - Not block the firewall: `netsh advfirewall firewall add rule name="ROS Bridge Port 9090" dir=in action=allow protocol=TCP localport=9090`
 
@@ -228,10 +228,16 @@ Turn Left: Both feet twist in the same negative direction. (This is exactly the 
 
 Turn Right: Both feet twist in the same positive direction.
 
+## Driving
+ros2 lib: diff_drive_controller
+NB: Two controllers cannot control the same joint at the same time.
+
+controllers.yaml -> rsp_gz.launch.py -> teleop.py
 # TODO
-- Before attacking the roll, I must add the two stabilizer on both side.
 diff_drive_controller (Differential Drive).
 - Stabilized the in driving position (work on brackets)
 - Write the logic to move from walking position to driving position.
 
-This controller accepts Velocity commands (e.g., "Drive forward at 1 meter per second")
+- Write the logic to transform walk <-> roll vice-versa before walking or rolling.
+
+

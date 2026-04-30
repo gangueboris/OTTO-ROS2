@@ -243,15 +243,13 @@
     </collision>
   </link>
 
-  <!-- Foot revolute joint — rotates about Z (tilt foot) -->
-  <joint name="left_foot_joint" type="revolute">
+  <!-- Foot continous joint — rotates about Z (tilt foot) -->
+  <joint name="left_foot_joint" type="continuous">
     <parent link="left_leg_link"/>
     <child  link="left_foot_link"/>
     <origin xyz="0 0 ${foot_z_in_leg - foot_h/2.0}" rpy="0 0 0"/>
     <axis   xyz="0 0 1"/>
-    <limit  lower="${-servo_limit/2}" upper="${servo_limit/2}"
-            effort="${servo_eff}"   velocity="${servo_vel}"/>
-    <xacro:servo_dynamics/>
+    <limit effort="${servo_eff}" velocity="${servo_vel}"/>
   </joint>
 
   <link name="left_foot_link">
@@ -376,13 +374,12 @@
     </collision>
   </link>
 
-  <joint name="right_foot_joint" type="revolute">
+  <joint name="right_foot_joint" type="continuous">
     <parent link="right_leg_link"/>
     <child  link="right_foot_link"/>
     <origin xyz="0 0 ${foot_z_in_leg - foot_h/2.0}" rpy="0 0 0"/>
     <axis   xyz="0 0 1"/>
-    <limit  lower="${-servo_limit/2}" upper="${servo_limit/2}"
-            effort="${servo_eff}"   velocity="${servo_vel}"/>
+    <limit effort="${servo_eff}" velocity="${servo_vel}"/>
     <xacro:servo_dynamics/>
   </joint>
 
