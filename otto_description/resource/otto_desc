@@ -241,3 +241,6 @@ diff_drive_controller (Differential Drive).
 - Write the logic to transform walk <-> roll vice-versa before walking or rolling.
 
 
+==============
+I 'm able to switch from walk to roll and back and forth
+But in driving mode, the robot doesn't advance

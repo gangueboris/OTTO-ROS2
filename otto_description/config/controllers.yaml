@@ -6,19 +6,31 @@ controller_manager:
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
-    joint_trajectory_controller:
+    hip_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    foot_controller:
       type: joint_trajectory_controller/JointTrajectoryController
 
     diff_drive_controller:
       type: diff_drive_controller/DiffDriveController
 
-joint_trajectory_controller:
+hip_controller:
   ros__parameters:
     joints:
       - left_hip_joint
       - right_hip_joint
-      - left_foot_joint   
-      - right_foot_joint  
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+
+foot_controller:
+  ros__parameters:
+    joints:
+      - left_foot_joint
+      - right_foot_joint
     command_interfaces:
       - position
     state_interfaces:
@@ -32,3 +44,16 @@ diff_drive_controller:
     wheel_separation: 0.05 
     wheel_radius: 0.03     
     use_stamped_vel: false
+
+    # NEW: Tell the controller how to apply power to reach the target speed
+    linear.x.has_velocity_limits: true
+    linear.x.max_velocity: 1.0
+    linear.x.min_velocity: -1.0
+    linear.x.has_acceleration_limits: true
+    linear.x.max_acceleration: 2.0
+    
+    angular.z.has_velocity_limits: true
+    angular.z.max_velocity: 3.0
+    angular.z.min_velocity: -3.0
+    angular.z.has_acceleration_limits: true
+    angular.z.max_acceleration: 3.0
