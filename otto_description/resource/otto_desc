@@ -231,6 +231,10 @@ Turn Right: Both feet twist in the same positive direction.
 # TODO
 - Read urdf and correct comments
 - Write the logic the new ctrl
+- Learn about jointStatebroadcaster and jointStateTrajectory 
+- Learn how to write a yaml file for the trajectory ctrl
+- rewrite the teleop logic by yourself
+- Understand the role of each node in launcher
 
 - Before attacking the roll, I must add the two stabilizer on both side.
 diff_drive_controller (Differential Drive).

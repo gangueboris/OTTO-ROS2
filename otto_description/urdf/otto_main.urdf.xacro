@@ -45,6 +45,18 @@
   <xacro:property name="leg_z"    value="0.035"/>
   <xacro:property name="leg_mass" value="0.025"/>
 
+  <!-- Bar segment -->
+  <xacro:property name="bar_x"    value="0.08"/>
+  <xacro:property name="bar_y"    value="0.002"/>
+  <xacro:property name="bar_z"    value="0.0015"/>
+  <xacro:property name="bar_mass" value="0.005"/>
+  
+  <!-- Bar support segment -->
+  <xacro:property name="support_x"    value="0.009"/>
+  <xacro:property name="support_y"    value="0.014"/>
+  <xacro:property name="support_z"    value="0.0015"/>
+  <xacro:property name="support_mass" value="0.001"/>
+
   <!-- Foot (flat disc) -->
   <xacro:property name="foot_r"    value="0.030"/>
   <xacro:property name="foot_h"    value="0.008"/>
@@ -157,6 +169,77 @@
       </geometry>
     </collision>
   </link>
+  <!-- Balance bar -->
+  <joint name="left_bar_joint" type="fixed">
+    <origin xyz="0.0 ${-leg_y/2} ${-leg_z/2 + bar_z}" rpy="0.0 0.0 0.0"/>
+    <parent link="left_leg_link"/>
+    <child link="left_bar_link"/>
+  </joint>
+
+  <!-- Left front support -->
+  <joint name="left_front_support_joint" type="fixed">
+    <origin xyz="${bar_x/2 - support_x/2} ${-support_y/2} 0" rpy="0.0 0.0 0.0"/> 
+    <parent link="left_bar_link"/>
+    <child link="left_front_support_link"/>
+  </joint>
+
+   <link name="left_front_support_link">
+    <xacro:inertia_box m="${support_mass}" x="${support_x}" y="${support_y}" z="${support_z}"/>
+    <visual>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${support_x} ${support_y} ${support_z}"/>
+      </geometry>
+      <material name="otto_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${support_x} ${support_y} ${support_z}"/> 
+      </geometry>
+    </collision>
+  </link>
+
+  <!--Left back support -->
+  <joint name="left_back_support_joint" type="fixed">
+    <origin xyz="${-bar_x/2 + support_x/2} ${-support_y/2} 0" rpy="0.0 0.0 0.0"/> 
+    <parent link="left_bar_link"/>
+    <child link="left_back_support_link"/>
+  </joint>
+
+  <link name="left_back_support_link">
+    <xacro:inertia_box m="${support_mass}" x="${support_x}" y="${support_y}" z="${support_z}"/>
+    <visual>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${support_x} ${support_y} ${support_z}"/>
+      </geometry>
+      <material name="otto_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${support_x} ${support_y} ${support_z}"/> 
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="left_bar_link">
+    <xacro:inertia_box m="${bar_mass}" x="${bar_x}" y="${bar_y}" z="${bar_z}"/>
+    <visual>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${bar_x} ${bar_y} ${bar_z}"/>
+      </geometry>
+      <material name="otto_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${bar_x} ${bar_y} ${bar_z}"/>
+      </geometry>
+    </collision>
+  </link>
 
   <!-- Foot revolute joint — rotates about Z (tilt foot) -->
   <joint name="left_foot_joint" type="revolute">
@@ -217,6 +300,76 @@
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
         <box size="${leg_x} ${leg_y} ${leg_z}"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_bar_joint" type="fixed">
+    <origin xyz="0.0 ${leg_y/2} ${-leg_z/2 + bar_z}" rpy="0.0 0.0 0.0"/>
+    <parent link="right_leg_link"/>
+    <child link="right_bar_link"/>
+  </joint>
+
+  <link name="right_bar_link">
+    <xacro:inertia_box m="${bar_mass}" x="${bar_x}" y="${bar_y}" z="${bar_z}"/>
+    <visual>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${bar_x} ${bar_y} ${bar_z}"/>
+      </geometry>
+      <material name="otto_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${bar_x} ${bar_y} ${bar_z}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Right front support -->
+  <joint name="right_front_support_joint" type="fixed">
+    <origin xyz="${bar_x/2 - support_x/2} ${support_y/2} 0" rpy="0.0 0.0 0.0"/> 
+    <parent link="right_bar_link"/>
+    <child link="right_front_support_link"/>
+  </joint>
+
+   <link name="right_front_support_link">
+    <xacro:inertia_box m="${support_mass}" x="${support_x}" y="${support_y}" z="${support_z}"/>
+    <visual>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${support_x} ${support_y} ${support_z}"/>
+      </geometry>
+      <material name="otto_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${support_x} ${support_y} ${support_z}"/> 
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Right back support -->
+  <joint name="right_back_support_joint" type="fixed">
+    <origin xyz="${-bar_x/2 + support_x/2} ${support_y/2} 0" rpy="0.0 0.0 0.0"/> 
+    <parent link="right_bar_link"/>
+    <child link="right_back_support_link"/>
+  </joint>
+
+  <link name="right_back_support_link">
+    <xacro:inertia_box m="${support_mass}" x="${support_x}" y="${support_y}" z="${support_z}"/>
+    <visual>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${support_x} ${support_y} ${support_z}"/>
+      </geometry>
+      <material name="otto_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${support_x} ${support_y} ${support_z}"/> 
       </geometry>
     </collision>
   </link>
