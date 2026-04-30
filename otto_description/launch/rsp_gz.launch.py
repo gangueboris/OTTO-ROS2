@@ -74,11 +74,21 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Spawn the Differential Drive Controller ASLEEP
+    diff_drive_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["diff_drive_controller", "--inactive", "--ros-args", "-p", "use_sim_time:=true"],
+    )
+
+    
+
     return LaunchDescription([
         node_robot_state_publisher,
         gazebo,
         spawn_entity,
         bridge,
         spawn_jsb,
-        spawn_jtc
+        spawn_jtc,
+        diff_drive_spawner
     ])
