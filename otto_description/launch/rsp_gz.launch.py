@@ -46,8 +46,31 @@ def generate_launch_description():
         ]
     )
 
+    bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            # The clock bridge 
+            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
+            
+            # Bridge for your joint states
+            '/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model',
+
+            # Cmd velocity (Sending cmd gz)
+            '/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
+
+            # Odometry (Receiving position from gz)
+            '/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
+
+            # Transforms (receiving movement data from Gazebo for Rviz)
+            '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'
+        ],
+        output='screen'
+    )
+
     return LaunchDescription([
         robot_state_publisher,
         gazebo,
-        spawn_entity
+        spawn_entity,
+        bridge
     ])

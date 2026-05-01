@@ -52,6 +52,26 @@
       </visual>
     </gazebo>
 
+    <!--<gazebo reference="right_back_support_link">
+        <mu1>0</mu1>
+        <mu2>0</mu2>
+    </gazebo>
+     <gazebo reference="right_front_support_link">
+        <mu1>0</mu1>
+        <mu2>0</mu2>
+    </gazebo>
+     <gazebo reference="left_back_support_link">
+        <mu1>0</mu1>
+        <mu2>0</mu2>
+    </gazebo>
+     <gazebo reference="left_front_support_link">
+        <mu1>0</mu1>
+        <mu2>0</mu2>
+    </gazebo>-->
+
+
+
+
     <!-- Gazebo's Plugins -->
     <gazebo>
       <!-- gz-sim-joint-state-publisher-system -->
@@ -64,6 +84,31 @@
         <joint_name>left_foot_joint</joint_name>
         <joint_name>right_hip_joint</joint_name>
         <joint_name>right_foot_joint</joint_name>
+      </plugin>
+
+      <!-- Differential Drive Plugin -->
+      <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+
+        <!-- Wheels configuration  -->
+        <left_joint>left_foot_joint</left_joint>
+        <right_joint>right_foot_joint</right_joint>
+        <wheel_separations>0.045</wheel_separations>
+        <wheel_radius>0.03</wheel_radius>
+
+        <!-- output: Control and Odometry (position) -->
+        <odom_publish_frequency>50</odom_publish_frequency>
+
+        <!-- Input -->
+        <topic>cmd_vel</topic>
+
+        <!-- Topics Gazebo will publish the data to -->
+      <odom_topic>odom</odom_topic>
+      <tf_topic>tf</tf_topic>
+      
+      <!-- Coordinate frames for RViz and Navigation -->
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_link</child_frame_id>
+
       </plugin>
     </gazebo>
 

@@ -119,7 +119,7 @@
   <joint name="left_hip_joint" type="revolute">
     <parent link="left_hip_servo"/>
     <child  link="left_leg_link"/>
-    <origin xyz="0 0 ${-leg_z/2.0}" rpy="0 0 0"/>
+    <origin xyz="0 0 ${-leg_z/2.0}" rpy="1.5708 0 0"/>
     <axis   xyz="1 0 0"/>
     <limit  lower="${-servo_limit}" upper="${servo_limit}"
             effort="${servo_eff}"   velocity="${servo_vel}"/>
@@ -215,7 +215,7 @@
   </link>
 
   <!-- Foot revolute joint — rotates about Z (tilt foot) -->
-  <joint name="left_foot_joint" type="revolute">
+  <joint name="left_foot_joint" type="continuous">
     <parent link="left_leg_link"/>
     <child  link="left_foot_link"/>
     <origin xyz="0 0 ${foot_z_in_leg - foot_h/2.0}" rpy="0 0 0"/>
@@ -253,7 +253,7 @@
   <joint name="right_hip_joint" type="revolute">
     <parent link="right_hip_servo"/>
     <child  link="right_leg_link"/>
-    <origin xyz="0 0 ${-leg_z/2.0}" rpy="0 0 0"/>
+    <origin xyz="0 0 ${-leg_z/2.0}" rpy="-1.5708 0 0"/>
     <axis   xyz="1 0 0"/>
     <limit  lower="${-servo_limit}" upper="${servo_limit}"
             effort="${servo_eff}"   velocity="${servo_vel}"/>
@@ -347,7 +347,7 @@
     </collision>
   </link>
 
-  <joint name="right_foot_joint" type="revolute">
+  <joint name="right_foot_joint" type="continuous">
     <parent link="right_leg_link"/>
     <child  link="right_foot_link"/>
     <origin xyz="0 0 ${foot_z_in_leg - foot_h/2.0}" rpy="0 0 0"/>

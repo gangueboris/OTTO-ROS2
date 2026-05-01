@@ -2,5 +2,11 @@ How to approach my learning ?
 I fix a goal (now that robot is in the simulation, my goal is the make to robot drive). So I will go and learn / get the required ressource to achieve that goal.
 
 
+*** diff drive plugin ***
+After have added the diff drive plugin to gazebo, don't forget to add bridge in the launch file.
+To test diff_drive, we will use: 'ros2 run teleop_twist_keyboard teleop_twist_keyboard'
 
-- Rewrite the launch file 
+** How to solve the friction problem in the wheel so that they can move ? **
+
+The robot drive will be like **Inverted Pendulum**
+I learn that diff_drive is for car setup only
