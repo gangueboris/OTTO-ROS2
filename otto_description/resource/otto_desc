@@ -228,6 +228,27 @@ Turn Left: Both feet twist in the same negative direction. (This is exactly the 
 
 Turn Right: Both feet twist in the same positive direction.
 
+==========================================================================================================
+## Gazebo
+How to connect Gazebo with ros2 ?
+First of all, you must create a gazebo_node to launch gazebo then spawn the robot_description in gazebo via the package 'ros_gz_sim'. You will notice that the color set in the urdf file doesn't appear in the simulation. You need to set the colors by yourself in an urdf file (gz.xacro).
+Now the robot is visible in the simulation but how to control it ?
+To be able to control the robot, we need to etablish a bridge between ros2 and gazebo, add ctrl plugin to gz to communicate via topic.
+*A gz plugin* communicate to ros2 via topics.
+
+*sim time* : ros2 uses time diff than gz. all node (in launch file) will need to set /use_sim_time=true to sync.
+
+- Simulate virtual actuators based on some kind of command input.
+- Publish the resulting joint positions/angles to the joint_states topic.
+
+
+
+## ros2 control and hardware_interfaces
+`ros2 control list_hardware_interfaces` 
+A robot can have multiple hardware_interface: I'm thinking to create two (walk and roll)
+- What is hardware interface ? What is control interface ?
+
+
 # TODO
 - Read urdf and correct comments
 - Write the logic the new ctrl

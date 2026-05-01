@@ -28,9 +28,5 @@ install(
   DIRECTORY urdf meshes launch rviz config
   DESTINATION share/${PROJECT_NAME}
 )
-# Install Python scripts
-install(PROGRAMS
-  scripts/otto_teleop.py scripts/otto_walk.py
-  DESTINATION lib/${PROJECT_NAME}
-)
+
 ament_package()

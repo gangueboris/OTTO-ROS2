@@ -1,0 +1,6 @@
+How to approach my learning ?
+I fix a goal (now that robot is in the simulation, my goal is the make to robot drive). So I will go and learn / get the required ressource to achieve that goal.
+
+
+
+- Rewrite the launch file 

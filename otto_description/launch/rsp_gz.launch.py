@@ -15,7 +15,7 @@ def generate_launch_description():
     robot_description_raw = xacro.process_file(xacro_file).toxml()
 
     # Robot State Publisher
-    node_robot_state_publisher = Node(
+    robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         output='screen',
@@ -46,39 +46,8 @@ def generate_launch_description():
         ]
     )
 
-    # Bridge the Simulation Clock to ROS2 # It is taking any message from Gazebo, reformatting it, and publishing it to ROS 2, and vice versa.
-    bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
-        output='screen'
-    )
-
-    # == ROS2_Controller ==
-
-    # Spawn Joint State Broadcaster
-    # This reads the joint positions from Gazebo and sends them to ROS
-    spawn_jsb = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['joint_state_broadcaster'],
-        output='screen'
-    )
-
-    # Spawn the Trajectory Controller
-    # This receives our movement commands and sends them to the Gazebo servos
-    spawn_jtc = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['joint_trajectory_controller'],
-        output='screen'
-    )
-
     return LaunchDescription([
-        node_robot_state_publisher,
+        robot_state_publisher,
         gazebo,
-        spawn_entity,
-        bridge,
-        spawn_jsb,
-        spawn_jtc
+        spawn_entity
     ])

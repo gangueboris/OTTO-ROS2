@@ -65,44 +65,8 @@
         <joint_name>right_hip_joint</joint_name>
         <joint_name>right_foot_joint</joint_name>
       </plugin>
-
-      <!-- gz_ros2_control -->
-      <!-- gz_ros2_control listen to the logic (Inverse Kinematics) from ROS2 and translate it to the simulation to move the robot. -->
-      <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-        <parameters>$(find otto_description)/config/controllers.yaml</parameters>    <!-- Load the yaml file to gazebo. -->
-      </plugin>
     </gazebo>
 
 
-    <!-- ROS2_control Specifications -->
-    <ros2_control name="GazeboSimSystem" type="system">
-      <hardware>
-        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
-      </hardware>
-
-      <joint name="left_hip_joint">
-        <command_interface name="position"/>
-        <state_interface name="position"/>
-        <state_interface name="velocity"/>
-      </joint>
-
-      <joint name="left_foot_joint">
-        <command_interface name="position"/>
-        <state_interface name="position"/>
-        <state_interface name="velocity"/>
-      </joint>
-
-      <joint name="right_hip_joint">
-        <command_interface name="position"/>
-        <state_interface name="position"/>
-        <state_interface name="velocity"/>
-      </joint>
-
-      <joint name="right_foot_joint">
-        <command_interface name="position"/>
-        <state_interface name="position"/>
-        <state_interface name="velocity"/>
-      </joint>
-    </ros2_control>
   </robot>
   

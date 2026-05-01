@@ -1,33 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="otto">
 
-  <!-- ============================================================
-       OTTO ROBOT — Main URDF model
-       otto_main.urdf.xacro
-
-       Kinematic structure
-       ───────────────────
-       base_link  (virtual, at floor level)
-         └── body_link          [fixed]    — torso + head box
-               ├── left_eye     [fixed]    — ultrasonic sensor L  (macro)
-               ├── right_eye    [fixed]    — ultrasonic sensor R  (macro)
-               ├── left_hip_servo  [fixed] — servo block L  (macro)
-               │     └── left_hip_joint   [revolute, Z]
-               │           └── left_leg_link
-               │                 └── left_foot_joint [revolute, Z]
-               │                       └── left_foot_link
-               └── right_hip_servo [fixed] — servo block R  (macro)
-                     └── right_hip_joint  [revolute, Z]
-                           └── right_leg_link
-                                 └── right_foot_joint [revolute, Z]
-                                       └── right_foot_link
-
-       Coordinate convention
-       ──────────────────────
-       +X  forward   +Y  left   +Z  up
-       All dimensions in metres, masses in kg.
-  ============================================================ -->
-
   <!-- ── Include utilities ── -->
   <xacro:include filename="otto_materials.xacro" />
   <xacro:include filename="otto_gz.xacro" />
