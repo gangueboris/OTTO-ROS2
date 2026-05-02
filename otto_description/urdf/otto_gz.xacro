@@ -52,7 +52,7 @@
       </visual>
     </gazebo>
 
-    <!--<gazebo reference="right_back_support_link">
+    <gazebo reference="right_back_support_link">
         <mu1>0</mu1>
         <mu2>0</mu2>
     </gazebo>
@@ -67,7 +67,7 @@
      <gazebo reference="left_front_support_link">
         <mu1>0</mu1>
         <mu2>0</mu2>
-    </gazebo>-->
+    </gazebo>
 
 
 
