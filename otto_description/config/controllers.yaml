@@ -1,0 +1,45 @@
+# Setup the Controller_manager
+controller_manager:
+  ros__parameters:
+    update_rate: 50
+    use_sim_time: true
+
+    # Controller specification to the controller_manager
+    # joint_state_broadcaster: is used to propagation joint_state into /joint_states
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    # Rolling controller
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController
+
+    # Bending controller
+    joint_trajectory_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+
+# Parameters definitions
+diff_drive_controller:
+  ros__parameters:
+    publish_rate: 50.0
+    base_frame_id: base_link
+    left_wheel_names: ['left_foot_joint']
+    right_wheel_names: ['right_foot_joint']
+    wheel_separation: 0.045
+    wheel_radius: 0.03
+    use_stamped_vel: false
+
+joint_trajectory_controller:
+  ros__parameters:
+    joints: 
+      - left_hip_joint
+      - right_hip_joint
+    interface_name: position
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+
+  
+

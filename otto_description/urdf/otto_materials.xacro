@@ -110,12 +110,7 @@
 
   </xacro:macro>
 
-  <!-- 
-       ULTRASONIC SENSOR MACRO  (HC-SR04 style — the "eyes")
-       parent_link : body/head link
-       side        : "left" | "right"
-       xyz / rpy   : pose in parent frame
-     -->
+  <!-- ULTRASONIC SENSOR MACRO -->
 
   <xacro:macro name="ultrasonic_eye" params="side parent_link xyz rpy">
 
@@ -144,4 +139,70 @@
 
   </xacro:macro>
 
+   <!--=========== GAZEBO: Color setting ===========-->
+    <gazebo reference="body_link">
+      <visual>
+        <material>
+          <ambient>0.18 0.52 0.80 1.0</ambient>       <!-- Lighting: dictates what the object looks like when it is in the shadows -->
+          <diffuse>0.18 0.52 0.80 1.0</diffuse>       <!-- Color : object reflects when a direct light source (like the sun or a spotlight) hits it.-->
+        </material>
+      </visual>
+    </gazebo>
+
+    <gazebo reference="left_leg_link">
+      <visual>
+        <material>
+          <ambient>0.18 0.52 0.80 1.0</ambient>
+          <diffuse>0.18 0.52 0.80 1.0</diffuse>
+        </material>
+      </visual>
+    </gazebo>
+
+    <gazebo reference="right_leg_link">
+      <visual>
+        <material>
+          <ambient>0.18 0.52 0.80 1.0</ambient>
+          <diffuse>0.18 0.52 0.80 1.0</diffuse>
+        </material>
+      </visual>
+    </gazebo>
+
+    <gazebo reference="left_foot_link">
+      <mu1>0.9</mu1>
+      <mu2>0.9</mu2>
+      <visual>
+        <material>
+          <ambient>0.65 0.65 0.65 1.0</ambient>
+          <diffuse>0.65 0.65 0.65 1.0</diffuse>
+        </material>
+      </visual>
+    </gazebo>
+
+    <gazebo reference="right_foot_link">
+      <mu1>0.9</mu1>                               <!--Friction/gripping on the floor.-->
+      <mu2>0.9</mu2>
+      <visual>
+        <material>
+          <ambient>0.65 0.65 0.65 1.0</ambient>
+          <diffuse>0.65 0.65 0.65 1.0</diffuse>
+        </material>
+      </visual>
+    </gazebo>
+
+    <gazebo reference="right_back_support_link">
+        <mu1>0</mu1>
+        <mu2>0</mu2>
+    </gazebo>
+     <gazebo reference="right_front_support_link">
+        <mu1>0</mu1>
+        <mu2>0</mu2>
+    </gazebo>
+     <gazebo reference="left_back_support_link">
+        <mu1>0</mu1>
+        <mu2>0</mu2>
+    </gazebo>
+     <gazebo reference="left_front_support_link">
+        <mu1>0</mu1>
+        <mu2>0</mu2>
+    </gazebo>
 </robot>

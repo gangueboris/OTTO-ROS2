@@ -31,7 +31,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': '-r empty.sdf', 'on_exit_shutdown': 'true'}.items(),                   # -r : run, empty.sdf: the world to load
+        launch_arguments={'gz_args': '-r empty.sdf', 'on_exit_shutdown': 'true'}.items(),     # -r : run, empty.sdf: the world to load
     )
 
     # Spawn the Robot in Gazebo
@@ -46,25 +46,34 @@ def generate_launch_description():
         ]
     )
 
+    # Spawn joint_state_broadcaster
+    spawn_broadcaster = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['joint_state_broadcaster', '--controller-manager', '/controller_manager'],
+        output='screen'
+    )
+
+    # Spawn diff_drive_controller
+    spawn_diff_drive = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['diff_drive_controller', '--controller-manager', '/controller_manager'],
+        output='screen'
+    )
+    
+    # Spawn joint_trajectory_controller
+    spawn_trajectory_controller = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['joint_trajectory_controller', '--controller-manager', '/controller_manager'],
+        output='screen'
+    )
+
     bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
-        arguments=[
-            # The clock bridge 
-            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
-            
-            # Bridge for your joint states
-            '/joint_states@sensor_msgs/msg/JointState[gz.msgs.Model',
-
-            # Cmd velocity (Sending cmd gz)
-            '/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
-
-            # Odometry (Receiving position from gz)
-            '/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
-
-            # Transforms (receiving movement data from Gazebo for Rviz)
-            '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'
-        ],
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
         output='screen'
     )
 
@@ -72,5 +81,8 @@ def generate_launch_description():
         robot_state_publisher,
         gazebo,
         spawn_entity,
+        spawn_broadcaster,
+        spawn_diff_drive,
+        spawn_trajectory_controller,
         bridge
     ])

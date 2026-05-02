@@ -12,4 +12,38 @@ The robot drive will be like **Inverted Pendulum**
 I learn that diff_drive is for car setup only
 
 === Rolling Testing ===
-Issue on backward rolling  ???
+Issue on backward rolling  ??? The robot hit bend due to inertia effects after have applied driving force.
+The legs band because they are in "revolute" without motors (porte colissante) but by seting motors, we can maintain
+their position fixed to a certain degree.
+Note that at this stage, I have only two motors in wheels.
+So to fixed the problem I have to move from using pluggins (like diff_drive) to ros2_controller ?
+
+== What is ros2_controller ? ==
+Note that diff_drive is a controller, but it is limited in the system. When I will add motor to the legs, I will need
+another controller to control them (something like joint-bending controller in ros2, it called joint_trajectory_controller).
+
+ros2_controller is a framework which allows us to organize our project in a certain way so that the code written 
+for the simulation will completly work the real world. Because it is well organize, it allows us to manage different
+controllers in the project.
+
+It is separate in 3 levels:
+ ** Controllers ** : Intead of using gazebo controller (diff_drive), we will use ros2_diff_drive_controller to 
+ do the work. I will allow ros2 to manage motor intead of gazebo and ros2 can manage multiple controller at the
+ same time and check if their are working well. the controllers will be defined in a .yaml file.
+
+ ** Controller Manager **: it takes the mathematical output from the controller and make sure that there is not 
+ conflit between ctrls.
+
+ ** Hardware Interface **: it translate number into electronic signal. It here we will specify the motors
+ of our robot.  To communicate with gazebo to send cmd, we use the plugin 'gz_ros2_control'. The hardware Interface
+ is written in an urdf file.
+
+## ros2 control commands
+'ros2 control list_hardware_interfaces'
+'ros2 control list_controllers'
+'ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/diff_drive_controller/cmd_vel_unstamped'
+
+
+------------
+Complete setup ros2_control
+Testing: diff_drive but the robot_does move

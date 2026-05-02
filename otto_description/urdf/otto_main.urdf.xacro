@@ -3,7 +3,8 @@
 
   <!-- ── Include utilities ── -->
   <xacro:include filename="otto_materials.xacro" />
-  <xacro:include filename="otto_gz.xacro" />
+  <xacro:include filename="otto_ros2_control.xacro" />
+
   <!--==== PHYSICAL PARAMETERS ====-->
 
   <!-- Body / head combined box -->
