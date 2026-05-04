@@ -25,7 +25,7 @@ endif()
 
 # To ensure ROS2 copies all added files and meshes when I run colcon build
 install(
-  DIRECTORY urdf meshes launch rviz config
+  DIRECTORY urdf meshes launch rviz config worlds
   DESTINATION share/${PROJECT_NAME}
 )
 

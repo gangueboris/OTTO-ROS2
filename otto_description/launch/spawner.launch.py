@@ -9,6 +9,7 @@ import xacro
 def generate_launch_description():
     pkg_name = 'otto_description'
     urdf_path = 'urdf/otto_main.urdf.xacro'
+    world_path = os.path.join(get_package_share_directory(pkg_name), 'worlds', 'custom_world.sdf')
 
     # Process the URDF
     xacro_file = os.path.join(get_package_share_directory(pkg_name), urdf_path)
@@ -31,7 +32,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': '-r empty.sdf', 'on_exit_shutdown': 'true'}.items(),     # -r : run, empty.sdf: the world to load
+        launch_arguments={'gz_args': f'-r {world_path}', 'on_exit_shutdown': 'true'}.items(),     # -r : run, empty.sdf: the world to load
     )
 
     # Spawn the Robot in Gazebo
@@ -77,6 +78,14 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Remap '/cmd_vel', '/diff_drive_controller/cmd_vel' because rqt_robot_steering publishes on /cmd_vel and diff_drive_controller listens on /diff_drive_controller/cmd_vel
+    rqt_robot_steering = Node(
+        package='rqt_robot_steering',
+        executable='rqt_robot_steering',
+        remappings=[('/cmd_vel', '/diff_drive_controller/cmd_vel')],
+        output='screen'
+    )
+
     return LaunchDescription([
         robot_state_publisher,
         gazebo,
@@ -84,5 +93,6 @@ def generate_launch_description():
         spawn_broadcaster,
         spawn_diff_drive,
         spawn_trajectory_controller,
-        bridge
+        bridge,
+        rqt_robot_steering
     ])

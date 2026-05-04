@@ -44,6 +44,13 @@ It is separate in 3 levels:
 'ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/diff_drive_controller/cmd_vel_unstamped'
 
 
+Driving interface: sudo apt install ros-jazzy-rqt-robot-steering
+
+## rqt_robot_steering
+rqt_robot_steering is a simple tool that publishes the basic Twist. And to allow ros2_control to hangle twist data,
+we have to set in the .yaml file use_time_stamp: false so that it could parse twist data.
+
 ------------
 Complete setup ros2_control
 Testing: diff_drive but the robot_does move
+
