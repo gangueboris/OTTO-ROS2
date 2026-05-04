@@ -12,22 +12,14 @@
         <!-- Drive Wheels (Velocity ctrl)-->
         <joint name="left_foot_joint">
             <!-- Data to send -->
-            <command_interface name="velocity">
-                <param name="min">-10</param>
-                <param name="max">10</param> 
-            </command_interface>
-
+            <command_interface name="position"/>
             <!-- Data to read only -->
             <state_interface name="velocity"/>
             <state_interface name="position"/>
         </joint>
         
         <joint name="right_foot_joint">
-            <command_interface name="velocity">
-                <param name="min">-10</param>
-                <param name="max">10</param> 
-            </command_interface>
-
+            <command_interface name="position"/>
             <state_interface name="velocity"/>
             <state_interface name="position"/>
         </joint>
@@ -35,13 +27,11 @@
         <!-- Bending knees (Position ctrl)-->
         <joint name="left_hip_joint">
             <command_interface name="position"/>
-
             <state_interface name="position"/>
             <state_interface name="velocity"/>
         </joint>
         <joint name="right_hip_joint">
             <command_interface name="position"/>
-            
             <state_interface name="position"/>
             <state_interface name="velocity"/>
         </joint>

@@ -25,8 +25,14 @@ endif()
 
 # To ensure ROS2 copies all added files and meshes when I run colcon build
 install(
-  DIRECTORY urdf meshes launch rviz config worlds
+  DIRECTORY urdf meshes launch rviz config worlds scripts
   DESTINATION share/${PROJECT_NAME}
+)
+
+# Install Python scripts
+install(PROGRAMS
+  scripts/otto_walk.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_package()

@@ -50,7 +50,34 @@ Driving interface: sudo apt install ros-jazzy-rqt-robot-steering
 rqt_robot_steering is a simple tool that publishes the basic Twist. And to allow ros2_control to hangle twist data,
 we have to set in the .yaml file use_time_stamp: false so that it could parse twist data.
 
+
+## Walking Mode
+to switch from walking to Rolling mode I have to change:
+left_hip_joint:  rpy="0 0 0"  rpy="1.5708 0 0"
+right_hip_joint: rpy="0 0 0"  rpy="-1.5708 0 0"
+
+In <ros2_control>:  <command_interface name="velocity"/> =>  <command_interface name="position"/>
+Note: You can check if the controller (brain) is active or note via: ros2 control list_controllers
+Note: You will often deal with .yaml file, the launch file and the urdf file (ros2_control), If you have an Issue,
+think to check those 3 files.
+
+# == Testing Walking with the second brain (joint_trajectory_controller from ros2_control) ==
+I will write a python script where I made the robot perform forward walk.
+
+
+##======== CONFLICTS =======
+I am facing a conflict here. I want two brains (two controllers: diff_drive & joint_trajectory) to controller same joints
+(left_foot_joint & right_foot_joint) which is a violation rule in ros2. So it will not work.
+
+How to fix that conflict ?
+Keep one brain  (in .yaml file) on the share joints. This approach will allow me to test the walking. Later, I will look for a 
+way to keep both and transition from walking to rolling and vice-versa.
+ ros2 run otto_description otto_walk.py
+
+otto_walk contains a script which publishes in the topic /joint_trajectory_controller/joint_trajectory joints.
+
 ------------
-Complete setup ros2_control
-Testing: diff_drive but the robot_does move
+Now that I have tested and validate both rolling and walking individualy, next time, I will work a way to 
+use them in serie where I could switch dynamically from rolling to walking and vice-versa without changing manually
+parameters and by respecting the rule of 'Not multiple brain/controller on the same joints.'
 
