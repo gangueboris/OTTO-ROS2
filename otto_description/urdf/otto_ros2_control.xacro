@@ -12,6 +12,7 @@
         <!-- Drive Wheels (Velocity ctrl)-->
         <joint name="left_foot_joint">
             <!-- Data to send -->
+            <command_interface name="velocity"/>
             <command_interface name="position"/>
             <!-- Data to read only -->
             <state_interface name="velocity"/>
@@ -19,6 +20,7 @@
         </joint>
         
         <joint name="right_foot_joint">
+            <command_interface name="velocity"/>
             <command_interface name="position"/>
             <state_interface name="velocity"/>
             <state_interface name="position"/>

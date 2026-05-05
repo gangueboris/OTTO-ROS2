@@ -56,14 +56,13 @@ def generate_launch_description():
     )
 
     # Spawn diff_drive_controller
-    """
+    
     spawn_diff_drive = Node(
         package='controller_manager',
         executable='spawner',
-        arguments=['diff_drive_controller', '--controller-manager', '/controller_manager'],
+        arguments=['diff_drive_controller', '--controller-manager', '/controller_manager', '--inactive'],
         output='screen'
     )
-    """
     
     # Spawn joint_trajectory_controller
     spawn_trajectory_controller = Node(
@@ -88,15 +87,7 @@ def generate_launch_description():
         remappings=[('/cmd_vel', '/diff_drive_controller/cmd_vel')],
         output='screen'
     )
-
-    
-    # Walking Node
-    walk_node = Node(
-        package='otto_description',
-        executable='otto_walk.py',
-        name='otto_walk_node',
-        output='screen'
-    )"""
+    """
 
     return LaunchDescription([
         robot_state_publisher,
@@ -104,5 +95,6 @@ def generate_launch_description():
         spawn_entity,
         spawn_broadcaster,
         spawn_trajectory_controller,
+        spawn_diff_drive,
         bridge,
     ])

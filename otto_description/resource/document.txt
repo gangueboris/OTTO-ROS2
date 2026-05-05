@@ -76,8 +76,14 @@ way to keep both and transition from walking to rolling and vice-versa.
 
 otto_walk contains a script which publishes in the topic /joint_trajectory_controller/joint_trajectory joints.
 
-------------
-Now that I have tested and validate both rolling and walking individualy, next time, I will work a way to 
-use them in serie where I could switch dynamically from rolling to walking and vice-versa without changing manually
-parameters and by respecting the rule of 'Not multiple brain/controller on the same joints.'
+## ==== Reflection =====
+It is possible to have multiple controllers for the same joints, but only one is active at a time. I can switch between them using the controller manager.
+In ROS 2, a single joint can have multiple command interfaces. So this allows us to solve the switching in the urdf file.
 
+How to switch mode ?
+ros2 run otto_description switch_mode.py walk/roll
+
+------------
+I'am able to switch mode. But physically, the switching is not smooth. When I want to move from walk to roll,
+the robot fails. I have to find a way to make it smooth.
+Once that solved, I will setup phone remote control. (web app, wifi...)
