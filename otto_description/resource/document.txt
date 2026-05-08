@@ -65,7 +65,7 @@ think to check those 3 files.
 I will write a python script where I made the robot perform forward walk.
 
 
-##======== CONFLICTS =======
+##======== CONFLICTS ========
 I am facing a conflict here. I want two brains (two controllers: diff_drive & joint_trajectory) to controller same joints
 (left_foot_joint & right_foot_joint) which is a violation rule in ros2. So it will not work.
 
@@ -82,8 +82,16 @@ In ROS 2, a single joint can have multiple command interfaces. So this allows us
 
 How to switch mode ?
 ros2 run otto_description switch_mode.py walk/roll
+After have moved and try to switch and it doesn't work is because when I switch the mode, the controller release the joints at whatever position they 
+were that exact time. And it could be in an inballanced position. That why it falls.
+So to fix that, I think when I want to switch:
+walk -> roll : I will send positions to (0, 0) before the transformation. And
+roll -> walk : I will send cmd_vel (0, 0) to stop the roll before the transformation.
+So, I have to always put the robot in a known safe state before switching controllers.
+
 
 ------------
 I'am able to switch mode. But physically, the switching is not smooth. When I want to move from walk to roll,
 the robot fails. I have to find a way to make it smooth.
+First switch works but moving back and forth from walk <-> roll destabilize the robot and make it fall.
 Once that solved, I will setup phone remote control. (web app, wifi...)

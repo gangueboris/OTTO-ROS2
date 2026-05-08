@@ -168,8 +168,8 @@
     </gazebo>
 
     <gazebo reference="left_foot_link">
-      <mu1>0.9</mu1>
-      <mu2>0.9</mu2>
+      <mu1>0.9</mu1>  <!-- forward friction: keep high -->
+      <mu2>0.3</mu2>   <!-- lateral friction: lower to prevent pivot -->
       <visual>
         <material>
           <ambient>0.65 0.65 0.65 1.0</ambient>
@@ -180,7 +180,7 @@
 
     <gazebo reference="right_foot_link">
       <mu1>0.9</mu1>                               <!--Friction/gripping on the floor.-->
-      <mu2>0.9</mu2>
+      <mu2>0.3</mu2>
       <visual>
         <material>
           <ambient>0.65 0.65 0.65 1.0</ambient>

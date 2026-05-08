@@ -6,6 +6,7 @@ from rclpy.node import Node
 from controller_manager_msgs.srv import SwitchController        # it is a service
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from builtin_interfaces.msg import Duration
+from geometry_msgs.msg import Twist
 
 
 class SwitchMode(Node):
@@ -16,6 +17,8 @@ class SwitchMode(Node):
 
         # Publisher to move the robot during switching
         self.traj_pub = self.create_publisher(JointTrajectory, '/joint_trajectory_controller/joint_trajectory', 10)
+
+        self.vel_pub = self.create_publisher(Twist, '/diff_drive_controller/cmd_vel', 10)
 
         # Wait for the controller to run
         while not self.client.wait_for_service(timeout_sec=1.0):
@@ -45,19 +48,29 @@ class SwitchMode(Node):
         point.positions = [left_angle, right_angle, 0.0, 0.0]
 
         # set a time to bend
-        point.time_from_start = Duration(sec=1, nanosec=0)
+        point.time_from_start = Duration(sec=0, nanosec=500_000_000) # 0.5s
         msg.points.append(point)
         self.traj_pub.publish(msg)
 
         # Pause the script to let Gazebo finish moving
-        time.sleep(1)
+        time.sleep(5)
+    
+    def stop_rolling(self):
+        # Send velocity (0,0) and wait
+        msg = Twist()   # All zeros by default
+        self.vel_pub.publish(msg)
+        self.get_logger().info('Stopping roll...')
+
     
     def switch_to_roll(self):
         self.get_logger().info("--- Switching to roll ---")
+    
 
         # Wake up the trajectory controller to move the hips
         self.call_switch(['joint_trajectory_controller'], ['diff_drive_controller'])
-
+        time.sleep(0.5)
+        # Move to position (0, 0)
+        self.move_hips(0.0, 0.0)
         # Bend the hips to 90 degrees
         self.move_hips(1.5708, -1.5708)
 
@@ -71,13 +84,16 @@ class SwitchMode(Node):
 
     def switch_to_walk(self):
         self.get_logger().info("--- Switching to walk ---")
+        # Stop the wheels
+        self.stop_rolling()
 
         # Set up the brain to diff_drive
         if self.call_switch(['joint_trajectory_controller'], ['diff_drive_controller']):
+            time.sleep(0.5)
             self.move_hips(0, 0)  # Move to stand up straight
             self.get_logger().info("== Ready to walk ==")
         else:
-            self.get_logger().error("Failed to activate diff_drive!")
+            self.get_logger().error("Failed to activate joint_trajectory_controller!!")
 
 
 def main(args=None):
