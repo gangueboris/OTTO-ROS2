@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <title>Otto OCU (Operator Control Unit)</title>
+    <!-- == Import ROS library ==-->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #1e272e; color: white; 
+            text-align: center; margin: 0; padding: 20px;
+            overscroll-behavior: none; /* Prevents phone from pulling-to-refresh */
+        }
+        h1 { margin-bottom: 5px; }
+        #status { color: #f1c40f; margin-bottom: 20px; font-weight: bold; }
+        
+        /* Mode Toggle Buttons */
+        .mode-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .mode-btn {
+            flex: 1; max-width: 150px; padding: 15px; font-size: 18px; font-weight: bold;
+            border-radius: 10px; border: 2px solid transparent; cursor: pointer;
+            background-color: #485460; color: #d2dae2; transition: 0.3s;
+        }
+        .mode-btn.active { background-color: #0fb9b1; color: white; border-color: #000; box-shadow: 0 0 15px #0fb9b1; }
+        
+        /* Joystick Canvas */
+        #joystickZone {
+            width: 300px; height: 300px; margin: 0 auto;
+            background-color: #2f3640; border-radius: 50%;
+            position: relative; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            touch-action: none; /* Crucial for phone touch tracking */
+        }
+        canvas { position: absolute; top: 0; left: 0; }
+        
+        #debug { margin-top: 20px; font-family: monospace; color: #0fb9b1; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>- OTTO -</h1>
+    <div id="status">Connecting to ROS 2...</div>
+
+    <div class="mode-container">
+        <button id="btnWalk" class="mode-btn active" onclick="setMode('walk')"> Walk Mode</button>
+        <button id="btnRoll" class="mode-btn" onclick="setMode('roll')"> Roll Mode</button>
+    </div>
+
+    <div id="joystickZone">
+        <canvas id="joystickCanvas" width="300" height="300"></canvas>
+    </div>
+
+    <div id="debug">Command: stop</div>
+
+    <script type="text/javascript">
+        // ==========================================
+        // ROS 2 CONNECTION
+        // ==========================================
+        const IP_ADDRESS = '10.188.21.21'; //'10.172.61.178'; // <-- WI-FI IP (WINDOWS_IP)!
+        
+        // Websocket_connexion creation at IP_ADDRESS:9090
+        var ros = new ROSLIB.Ros({ url : `ws://${IP_ADDRESS}:9090` });
+        
+        // Handle the connexion successful between the websocket & rosbridge
+        ros.on('connection', () => {
+            document.getElementById("status").innerHTML = "🟢 System Online";
+            document.getElementById("status").style.color = "#2ecc71";
+        });
+
+        // Handling a failled connexion
+        ros.on('error', () => {
+            document.getElementById("status").innerHTML = "🔴 Connection Lost";
+            document.getElementById("status").style.color = "#ff3f34";
+        });
+        
+        // Setup the ros topic where I will send/receive data from ros2
+        var cmdTopic = new ROSLIB.Topic({ 
+            ros : ros, name : '/otto_command', messageType : 'std_msgs/msg/String'
+        });
+
+        // ==========================================
+        // STATE MANAGEMENT
+        // ==========================================
+        let currentMode = 'walk';
+        let currentCommand = 'stop';
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('btnWalk').classList.toggle('active', mode === 'walk');
+            document.getElementById('btnRoll').classList.toggle('active', mode === 'roll');
+            sendCommand('stop'); // Safety stop when switching modes
+        }
+
+        function sendCommand(action) {
+            // Only send the command if it changed, so we don't spam the ROS network
+            if (action !== currentCommand) {
+                currentCommand = action;
+                document.getElementById('debug').innerText = `Mode: [${currentMode}] | Cmd: ${action}`;
+                
+                // Prefix the command with the mode ("walk_forward" or "roll_stop")
+                let payload = `${currentMode}_${action}`;
+                if (action === 'stop') payload = 'stop'; // Stop is universal
+
+                var msg = new ROSLIB.Message({ data: payload });
+                cmdTopic.publish(msg);
+            }
+        }
+
+        // ==========================================
+        // VIRTUAL JOYSTICK (Canvas)
+        // ==========================================
+        const canvas = document.getElementById('joystickCanvas');
+        const ctx = canvas.getContext('2d');
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const maxRadius = 100; // How far the stick can be pushed
+        let stickX = centerX;
+        let stickY = centerY;
+        let isDragging = false;
+
+        function drawJoystick() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Draw crosshairs
+            ctx.beginPath(); ctx.moveTo(centerX, 20); ctx.lineTo(centerX, 280);
+            ctx.moveTo(20, centerY); ctx.lineTo(280, centerY);
+            ctx.strokeStyle = '#718093'; ctx.lineWidth = 2; ctx.stroke();
+            // Draw Stick
+            ctx.beginPath(); ctx.arc(stickX, stickY, 40, 0, Math.PI * 2);
+            ctx.fillStyle = isDragging ? '#0fb9b1' : '#d2dae2';
+            ctx.fill(); ctx.shadowBlur = 10; ctx.shadowColor = "black";
+        }
+
+        function updatePosition(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            let x = clientX - rect.left;
+            let y = clientY - rect.top;
+
+            // Calculate distance from center (Pythagoras)
+            let dx = x - centerX;
+            let dy = y - centerY;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Cap the stick movement to the maxRadius
+            if (distance > maxRadius) {
+                x = centerX + (dx / distance) * maxRadius;
+                y = centerY + (dy / distance) * maxRadius;
+            }
+
+            stickX = x; stickY = y; drawJoystick();
+
+            // Calculate Intent (Forward, Backward, Left, Right)
+            if (distance < 20) {
+                sendCommand('stop'); // Deadzone
+            } else {
+                let angle = Math.atan2(dy, dx) * 180 / Math.PI; // -180 to 180
+                if (angle >= -135 && angle < -45) sendCommand('forward');
+                else if (angle >= 45 && angle < 135) sendCommand('backward');
+                else if (angle >= -45 && angle < 45) sendCommand('right');
+                else sendCommand('left');
+            }
+        }
+
+        // Mouse Events (For Laptop testing)
+        canvas.addEventListener('mousedown', (e) => { isDragging = true; updatePosition(e.clientX, e.clientY); });
+        canvas.addEventListener('mousemove', (e) => { if (isDragging) updatePosition(e.clientX, e.clientY); });
+        window.addEventListener('mouseup', () => { isDragging = false; stickX = centerX; stickY = centerY; drawJoystick(); sendCommand('stop'); });
+
+        // Touch Events (For Phone)
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); isDragging = true; updatePosition(e.touches[0].clientX, e.touches[0].clientY); });
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (isDragging) updatePosition(e.touches[0].clientX, e.touches[0].clientY); });
+        canvas.addEventListener('touchend', (e) => { e.preventDefault(); isDragging = false; stickX = centerX; stickY = centerY; drawJoystick(); sendCommand('stop'); });
+
+        drawJoystick(); // Initial draw
+    </script>
+</body>
+</html>

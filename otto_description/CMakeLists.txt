@@ -31,7 +31,7 @@ install(
 
 # Install Python scripts
 install(PROGRAMS
-  scripts/otto_walk.py scripts/switch_mode.py
+  scripts/otto_walk.py scripts/otto_teleop.py scripts/switch_mode.py 
   DESTINATION lib/${PROJECT_NAME}
 )
 

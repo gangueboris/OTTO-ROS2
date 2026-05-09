@@ -89,9 +89,36 @@ walk -> roll : I will send positions to (0, 0) before the transformation. And
 roll -> walk : I will send cmd_vel (0, 0) to stop the roll before the transformation.
 So, I have to always put the robot in a known safe state before switching controllers.
 
+## === Remote Control ===
+switching mode fixed. Next, work on wifi robot control.
+- Switch mode cmd
+- For each mode, be able to move left, right, top, buttom using joystick. When not using the joystick, it 
+automatically cames to it initial position.
+To achieve that, I will implement a system of front &  back ends, building a webapp.
+Where in the front, I will use "roslibjs" and in the backend, "rosbridge_suite" which runs in the computer.
+And the both communicate via a topic.
+
+I will start with the front end setup and make sure that, from there, I can successfully send cmd in the /otto_command topic.
+## === Front End Setup ===
+With roslibjs, we can send/receive data from ros2 and display them live in a webapp via topic.
+Ok cool. I already wrote the script and the logic with roslibjs. 
+
+How to get my wifi IP: 'ifconfig' / ip a in the terminal of the machine running ros2, to update in the js script.
+## == Back End Setup ==
+I also wrote the node script to create /otto_command
+``sudo apt install ros-jazzy-rosbridge-server``
+and it works. Now I have look how to launch ros_bridge with this cmd: "
+- Run the python node: `ros2 run otto_description otto_teleop.py`
+- Websocket: `ros2 launch rosbridge_server rosbridge_websocket_launch.xml`
+
+I have an issue, I can't connect the front (roslibjs) to the back (ros_bridge). 
+The reason is because of the WIFI IP address was not correct. So everything was working perfectly but only the computer.
+Because I was using a virtual machine (wsl) the port wasn't forwarded.
+To fix that I must configure the wsl to forward port 9090 to the host machine.
+
 
 ------------
-I'am able to switch mode. But physically, the switching is not smooth. When I want to move from walk to roll,
-the robot fails. I have to find a way to make it smooth.
-First switch works but moving back and forth from walk <-> roll destabilize the robot and make it fall.
-Once that solved, I will setup phone remote control. (web app, wifi...)
+- Test webapp opening on the phone.
+- Make sure to received cmd in the /otto_command topic
+- Write the logic to handle the received cmds.
+
