@@ -97,7 +97,7 @@
             // Only send the command if it changed, so we don't spam the ROS network
             if (action !== currentCommand) {
                 currentCommand = action;
-                document.getElementById('debug').innerText = `Mode: [${currentMode}] | Cmd: ${window.location.hostname}}`;
+                document.getElementById('debug').innerText = `Mode: [${currentMode}] | Cmd: ${action}}`;
                 
                 // Prefix the command with the mode ("walk_forward" or "roll_stop")
                 let payload = `${currentMode}_${action}`;

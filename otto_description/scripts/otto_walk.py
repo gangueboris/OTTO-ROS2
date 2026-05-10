@@ -13,12 +13,7 @@ class OttoWalk(Node):
             '/joint_trajectory_controller/joint_trajectory',
             10)
 
-        self.joint_names = [
-            'left_hip_joint',
-            'left_foot_joint',
-            'right_hip_joint',
-            'right_foot_joint'
-        ]
+        self.joint_names = [ 'left_hip_joint', 'left_foot_joint', 'right_hip_joint', 'right_foot_joint']
 
         # Timing — "Down" phases need less time than lean/pivot
         self.SPEED_LEAN   = 0.8   # seconds — lean & pivot phases
