@@ -103,22 +103,35 @@ I will start with the front end setup and make sure that, from there, I can succ
 With roslibjs, we can send/receive data from ros2 and display them live in a webapp via topic.
 Ok cool. I already wrote the script and the logic with roslibjs. 
 
-How to get my wifi IP: 'ifconfig' / ip a in the terminal of the machine running ros2, to update in the js script.
+How to get my wifi IP: 'ifconfig' / hostname -I in the terminal of the machine running ros2, to update in the js script.
 ## == Back End Setup ==
 I also wrote the node script to create /otto_command
 ``sudo apt install ros-jazzy-rosbridge-server``
 and it works. Now I have look how to launch ros_bridge with this cmd: "
 - Run the python node: `ros2 run otto_description otto_teleop.py`
-- Websocket: `ros2 launch rosbridge_server rosbridge_websocket_launch.xml`
+- Websocket: `ros2 launch rosbridge_server rosbridge_websocket_launch.xml port:=9091`
 
+//  Network configuration 
 I have an issue, I can't connect the front (roslibjs) to the back (ros_bridge). 
 The reason is because of the WIFI IP address was not correct. So everything was working perfectly but only the computer.
 Because I was using a virtual machine (wsl) the port wasn't forwarded.
 To fix that I must configure the wsl to forward port 9090 to the host machine.
+I will use an approach called Mirrored Network: %userprofile% -> .wslconfig -> [wsl2]             -> wsl --shutdown
+                                                                               networkingMode=mirrored
+
+** Launch **
+** In wsl, run the websocket: 
+- ros2 launch rosbridge_server rosbridge_websocket_launch.xml port:=9091
+- Run the python node: `ros2 run otto_description otto_teleop.py`
+
+** In windows terminal as admin: Force Windows to forward the port **
+// Skip this cmd, use to replace .wslconfig "netsh interface portproxy add v4tov4 listenport=8000 listenaddress=0.0.0.0 connectport=8000 connectaddress=10.172.61.178" since wsl is already mirroring
+Go to 
+- "cd \\wsl.localhost\Ubuntu\home\boris\otto_ws\src\OTTO-ROS2\web" 
+- Run the python3 server: python3 -m http.server 8000
+
 
 
 ------------
-- Test webapp opening on the phone.
-- Make sure to received cmd in the /otto_command topic
 - Write the logic to handle the received cmds.
 

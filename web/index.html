@@ -57,10 +57,11 @@
         // ==========================================
         // ROS 2 CONNECTION
         // ==========================================
-        const IP_ADDRESS = '10.188.21.21'; //'10.172.61.178'; // <-- WI-FI IP (WINDOWS_IP)!
+        // Automatically grab whatever IP/hostname was used to load the website!
+        const IP_ADDRESS = window.location.hostname;
         
-        // Websocket_connexion creation at IP_ADDRESS:9090
-        var ros = new ROSLIB.Ros({ url : `ws://${IP_ADDRESS}:9090` });
+        // Websocket_connexion creation at IP_ADDRESS:9091
+        var ros = new ROSLIB.Ros({ url : `ws://${IP_ADDRESS}:9091` });
         
         // Handle the connexion successful between the websocket & rosbridge
         ros.on('connection', () => {
@@ -96,7 +97,7 @@
             // Only send the command if it changed, so we don't spam the ROS network
             if (action !== currentCommand) {
                 currentCommand = action;
-                document.getElementById('debug').innerText = `Mode: [${currentMode}] | Cmd: ${action}`;
+                document.getElementById('debug').innerText = `Mode: [${currentMode}] | Cmd: ${window.location.hostname}}`;
                 
                 // Prefix the command with the mode ("walk_forward" or "roll_stop")
                 let payload = `${currentMode}_${action}`;
