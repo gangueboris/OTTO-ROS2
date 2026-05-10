@@ -134,4 +134,4 @@ Go to
 
 ------------
 - Write the logic to handle the received cmds.
-
+- Impletement the switch mode and rolling

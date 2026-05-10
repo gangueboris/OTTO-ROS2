@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import sys
 import rclpy
-import time
 from rclpy.node import Node
 from controller_manager_msgs.srv import SwitchController        # it is a service
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from builtin_interfaces.msg import Duration
 from geometry_msgs.msg import Twist
+import time
 
 
 class SwitchMode(Node):
@@ -25,19 +25,29 @@ class SwitchMode(Node):
             self.get_logger().info('Waiting for the controller_manager service...')
 
 
+    def ros_sleep(self, seconds):
+        # Wait using the ROS clock to respect simulation time (Gazebo)
+        start_time = self.get_clock().now()
+        target_duration = rclpy.duration.Duration(seconds=seconds)
+        
+        # Keep spinning the node until the target time is reached
+        while rclpy.ok() and (self.get_clock().now() - start_time) < target_duration:
+            time.sleep(0.01) # Safe to use short real-sleeps since the ROS clock updates in the background
+
+
     def call_switch(self, activate, deactivate):
         # Helper function to cleanly switch
         req = SwitchController.Request()
          
-        # STRICT means it will fail if it can't perfectly stop/start the hardware
-        req.strictness = SwitchController.Request.STRICT
+        # STRICT means it will fail if it can't perfectly stop/start the hardware | BEST_EFFORT will safely ignore the "Controller is already active" warning
+        req.strictness = SwitchController.Request.BEST_EFFORT
         req.activate_controllers = activate
         req.deactivate_controllers = deactivate
 
         # Send the request
-        future = self.client.call_async(req)
-        rclpy.spin_until_future_complete(self, future)
-        return future.result().ok 
+        result = self.client.call(req)
+        return result.ok
+
 
     def move_hips(self, left_angle, right_angle):
         msg = JointTrajectory()
@@ -53,8 +63,9 @@ class SwitchMode(Node):
         self.traj_pub.publish(msg)
 
         # Pause the script to let Gazebo finish moving
-        time.sleep(5)
+        self.ros_sleep(5.0)
     
+
     def stop_rolling(self):
         # Send velocity (0,0) and wait
         msg = Twist()   # All zeros by default
@@ -64,13 +75,14 @@ class SwitchMode(Node):
     
     def switch_to_roll(self):
         self.get_logger().info("--- Switching to roll ---")
-    
 
         # Wake up the trajectory controller to move the hips
         self.call_switch(['joint_trajectory_controller'], ['diff_drive_controller'])
-        time.sleep(0.5)
+        self.ros_sleep(0.5)
+        
         # Move to position (0, 0)
         self.move_hips(0.0, 0.0)
+        
         # Bend the hips to 90 degrees
         self.move_hips(1.5708, -1.5708)
 
@@ -81,21 +93,22 @@ class SwitchMode(Node):
             self.get_logger().error("Failed to activate diff_drive!")
 
 
-
     def switch_to_walk(self):
         self.get_logger().info("--- Switching to walk ---")
+        
         # Stop the wheels
         self.stop_rolling()
 
         # Set up the brain to diff_drive
         if self.call_switch(['joint_trajectory_controller'], ['diff_drive_controller']):
-            time.sleep(0.5)
-            self.move_hips(0, 0)  # Move to stand up straight
+            self.ros_sleep(0.5)
+            self.move_hips(0.0, 0.0)  # Move to stand up straight
             self.get_logger().info("== Ready to walk ==")
         else:
             self.get_logger().error("Failed to activate joint_trajectory_controller!!")
 
 
+"""
 def main(args=None):
     rclpy.init(args=args)
 
@@ -119,3 +132,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+"""
