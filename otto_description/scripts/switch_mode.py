@@ -68,7 +68,7 @@ class SwitchMode(Node):
         self.traj_pub.publish(msg)
 
         # Wait for the trajectory to complete — 2s confirmed working with Gazebo sim lag
-        self.ros_sleep(2.0)
+        self.ros_sleep(2.5)
     
 
     def stop_rolling(self):

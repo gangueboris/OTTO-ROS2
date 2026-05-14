@@ -4,6 +4,9 @@
   <!-- ── Include utilities ── -->
   <xacro:include filename="otto_materials.xacro" />
   <xacro:include filename="otto_ros2_control.xacro" />
+  <xacro:include filename="otto_lidar.xacro" />
+  <xacro:include filename="otto_camera.xacro" />
+  <xacro:include filename="otto_display.xacro" />
 
   <!--==== PHYSICAL PARAMETERS ====-->
 
@@ -91,21 +94,6 @@
     <child  link="body_link"/>
     <origin xyz="0 0 ${body_z_from_base}" rpy="0 0 0"/>
   </joint>
-
-  <!--=== ULTRASONIC EYES  (macro from otto_materials.xacro)
-       Placed on the front face (+X), mirrored on Y axis  ===-->
-
-  <xacro:ultrasonic_eye
-    side="left"
-    parent_link="body_link"
-    xyz="${body_x/2.0 + 0.006}  0.018  ${body_z*0.15}"
-    rpy="0 ${pi/2} 0"/>
-
-  <xacro:ultrasonic_eye
-    side="right"
-    parent_link="body_link"
-    xyz="${body_x/2.0 + 0.006} -0.018  ${body_z*0.15}"
-    rpy="0 ${pi/2} 0"/>
 
   <!--=== LEFT LEG ASSEMBLY ===-->
 

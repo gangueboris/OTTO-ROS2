@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <joint name="display_joint" type="fixed">
+        <parent link="body_link"/>
+        <child link="display_link"/>
+        <origin xyz="0.037 0 0.00975" rpy="0.0 0.0 0.0"/>
+    </joint>
+
+    <link name="display_link">
+        <xacro:inertia_box m="0.008" x="0.00145" y="0.03" z="0.012"/>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.00145 0.03 0.012"/>
+            </geometry>
+            <material name="otto_black"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.00145 0.03 0.012"/>
+            </geometry>
+        </collision>
+    </link>
+
+</robot>

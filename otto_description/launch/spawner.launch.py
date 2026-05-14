@@ -79,16 +79,6 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Remap '/cmd_vel', '/diff_drive_controller/cmd_vel' because rqt_robot_steering publishes on /cmd_vel and diff_drive_controller listens on /diff_drive_controller/cmd_vel
-    """
-    rqt_robot_steering = Node(
-        package='rqt_robot_steering',
-        executable='rqt_robot_steering',
-        remappings=[('/cmd_vel', '/diff_drive_controller/cmd_vel')],
-        output='screen'
-    )
-    """
-
     return LaunchDescription([
         robot_state_publisher,
         gazebo,
