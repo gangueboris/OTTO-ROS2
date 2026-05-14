@@ -5,7 +5,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import TwistStamped
 from builtin_interfaces.msg import Duration
 from switch_mode import SwitchMode
 from rclpy.executors import MultiThreadedExecutor
@@ -20,7 +20,7 @@ class OttoTeleop(Node):
         self.main_cb_group = MutuallyExclusiveCallbackGroup()
 
         self.publisher_pos_ = self.create_publisher(JointTrajectory, '/joint_trajectory_controller/joint_trajectory', 10)
-        self.publisher_vel_ = self.create_publisher(Twist, '/diff_drive_controller/cmd_vel', 10)
+        self.publisher_vel_ = self.create_publisher(TwistStamped, '/diff_drive_controller/cmd_vel', 10)
         self.subscriber_otto_cmd = self.create_subscription(String, '/otto_command', self.command_callback, 10, callback_group=self.main_cb_group)
 
         self.joint_names = ['left_hip_joint', 'left_foot_joint', 'right_hip_joint', 'right_foot_joint']
@@ -130,10 +130,11 @@ class OttoTeleop(Node):
 
     # === Rolling ===
     def send_vel(self, linear_x, angular_z):
-        # Helper function to create and publish the Twist message
-        msg = Twist()
-        msg.linear.x = float(linear_x)
-        msg.angular.z = float(angular_z)
+        # Helper function to create and publish the TwistStamped message
+        msg = TwistStamped()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.twist.linear.x = float(linear_x)
+        msg.twist.angular.z = float(angular_z)
         self.publisher_vel_.publish(msg)
 
     def _start_vel_loop(self, linear_x, angular_z):
@@ -163,19 +164,19 @@ class OttoTeleop(Node):
 
     def roll_forward(self):
         self.get_logger().info('Moving Forward...')
-        self._start_vel_loop(self.linear_speed, 0.0)
+        self._start_vel_loop(0.0, self.angular_speed)
 
     def roll_backward(self):
         self.get_logger().info('Moving Backward...')
-        self._start_vel_loop(-self.linear_speed, 0.0)
+        self._start_vel_loop(0.0, -self.angular_speed)
 
     def turn_left(self):
         self.get_logger().info('Turning Left...')
-        self._start_vel_loop(0.0, self.angular_speed)
+        self._start_vel_loop(-self.linear_speed, 0.0)
 
     def turn_right(self):
         self.get_logger().info('Turning Right...')
-        self._start_vel_loop(0.0, -self.angular_speed)
+        self._start_vel_loop(self.linear_speed, 0.0)
 
     def stop_rolling(self):
         self.get_logger().info('Stopping...')

@@ -132,6 +132,15 @@ Go to
 
 
 
+** Rolling fixing issues **
+The reason why in rolling mode, the robot wasn't moving is because I was publishing in the wrong node. 
+The topic /diff_drive_controller/cmd_vel has two differents message type. (geometry_msgs/msg/Twist & geometry_msgs/msg/TwistStamped)
+I was the teleop was publishing in the geometry_msgs/msg/Twist while diff_drive_controller was reading in geometry_msgs/msg/TwistStamped.
+I discovered that by looking in the log.
+
+** Update to add later **
+- On remote interface, think to add speed ajustment.
+
 ------------
 - Write the logic to handle the received cmds.
 - Impletement the switch mode and rolling
@@ -147,8 +156,3 @@ Errors says, failed for activations, which means the problem could be in switch_
 
 Todo, remote all time things and add elements step by step by following first principle. Doing in parallel with switch_mode.py and otto_teleop.py
 
-
-ros2 topic pub /joint_trajectory_controller/joint_trajectory \
-  trajectory_msgs/msg/JointTrajectory \
-  "{joint_names: ['left_hip_joint', 'left_foot_joint', 'right_hip_joint', 'right_foot_joint'],
-    points: [{positions: [1.5708, 0.0, -1.5708, 0.0], time_from_start: {sec: 1}}]}"
