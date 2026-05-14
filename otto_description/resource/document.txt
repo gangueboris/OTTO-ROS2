@@ -135,3 +135,20 @@ Go to
 ------------
 - Write the logic to handle the received cmds.
 - Impletement the switch mode and rolling
+- What is the problem ?!
+The problem is on the switching side.
+I will walk from first principle to fix that.
+
+switch_mode
+- why are we using time.sleep after switching ?
+Errors says, failed for activations, which means the problem could be in switch_mode (look at time...)
+- In otto_teleop, what does _chedule_next ?
+
+
+Todo, remote all time things and add elements step by step by following first principle. Doing in parallel with switch_mode.py and otto_teleop.py
+
+
+ros2 topic pub /joint_trajectory_controller/joint_trajectory \
+  trajectory_msgs/msg/JointTrajectory \
+  "{joint_names: ['left_hip_joint', 'left_foot_joint', 'right_hip_joint', 'right_foot_joint'],
+    points: [{positions: [1.5708, 0.0, -1.5708, 0.0], time_from_start: {sec: 1}}]}"
