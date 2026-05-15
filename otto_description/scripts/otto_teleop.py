@@ -39,8 +39,8 @@ class OttoTeleop(Node):
         self.current_vel = (0.0, 0.0) # (linear_x, angular_z)
 
         # Kinematic variables
-        self.SPEED_LEAN = 0.8
-        self.SPEED_CENTER = 0.4
+        self.SPEED_LEAN = 1# 0.8
+        self.SPEED_CENTER = 0.5# 0.4
         LEAN_OUTER = 0.65
         LEAN_INNER = 0.65
         PIVOT = 0.52

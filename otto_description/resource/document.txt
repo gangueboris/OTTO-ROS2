@@ -134,7 +134,6 @@ Go to
 - pkill -9 -f _ros2_daemon
 - ros2 daemon start
 
-
 ** Rolling fixing issues **
 The reason why in rolling mode, the robot wasn't moving is because I was publishing in the wrong node. 
 The topic /diff_drive_controller/cmd_vel has two differents message type. (geometry_msgs/msg/Twist & geometry_msgs/msg/TwistStamped)
@@ -156,9 +155,38 @@ For these new sensors, I have to write their URDF model, their gazebo&plugin fil
 - Will be using optical frame: Standard robot joints point X forward, Y left, Z up. But camera lenses expect Z to point forward,
 X right and Y down. To face that quirk, we have to create a tiny invisible joint to rotate the data.
 
+**** SLAM ****
+SLAM: Simulation Localisation And Mapping
+It is an algorithmique system approach used by the robot to map his environment and navigate.
+It uses sensor fusion (Odometry, lidar, cameran IMU)
+It is an algorithm which allows robot vacuums, self-driving cars and mars rovers to navigate unknow environments without GPS.
 
-------------
+
+SLAM briefly, is when the robot know where it is and where the objects are.
+This approach is not globally precise as a GPS but locally, it is.
+Mapping: the map of the environment
+Localization: location of the robot relative to the map.
+
+SLAM maps grid approach
+Odometry effectively measures robot velocity.
+Among multiple navigation algorithms that exist, SLAM allows to correct drifting errors. By using the lidar and odometry, combined
+with computer vision algorithms and optimization methods. So that we can more accurately estimate the robot pose and map.
+
+What is save_map ? and what is serial_map ?
+
+**  SLAM Toolbox **
+Installation: 'sudo apt install ros-jazzy-slam-toolbox ros-jazzy-nav2-map-server'
+Launch slam toolbox: 'ros2 launch slam_toolbox online_async_launch.py slam_params_file:=/home/boris/otto_ws/src/otto_description/config/slam.yaml use_sim_time:=true'
+ros2 run tf2_ros tf2_echo odom base_link
+
+Notes ********
+We can use SLAM only in roll mode.
+
+
+----------------------------------------
+** To Fix **
+- Fix the slam odom issue
 
 - Fix sync cmd rivz2 and gazebo
 - Fix transformation switching issue
-- Setup the screen display
+- Fix phone control issue
