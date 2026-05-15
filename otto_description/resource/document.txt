@@ -161,3 +161,4 @@ X right and Y down. To face that quirk, we have to create a tiny invisible joint
 
 - Fix sync cmd rivz2 and gazebo
 - Fix transformation switching issue
+- Setup the screen display
