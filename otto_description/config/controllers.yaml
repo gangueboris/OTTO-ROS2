@@ -31,7 +31,6 @@ diff_drive_controller:
     use_stamped_vel: false
 
 
-
 joint_trajectory_controller:
   ros__parameters:
     joints: 

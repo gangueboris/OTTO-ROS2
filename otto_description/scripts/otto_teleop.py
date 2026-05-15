@@ -46,8 +46,8 @@ class OttoTeleop(Node):
         PIVOT = 0.52
 
         # Driving speed variables
-        self.linear_speed = 0.5  # m/s
-        self.angular_speed = 1.0 # rad/s
+        self.linear_speed = 1  # m/s
+        self.angular_speed = 2.0 # rad/s
 
 
         # Gait dictionary (4 directionals)

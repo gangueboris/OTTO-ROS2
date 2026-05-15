@@ -130,6 +130,10 @@ Go to
 - "cd \\wsl.localhost\Ubuntu\home\boris\otto_ws\src\OTTO-ROS2\web" 
 - Run the python3 server: python3 -m http.server 8000
 
+*** Kill and reopen a process ***
+- pkill -9 -f _ros2_daemon
+- ros2 daemon start
+
 
 ** Rolling fixing issues **
 The reason why in rolling mode, the robot wasn't moving is because I was publishing in the wrong node. 
@@ -141,10 +145,19 @@ I discovered that by looking in the log.
 - On remote interface, think to add speed ajustment.
 
 **** Adding sensors ****
+URDF Physical Link -> Gazebo Sensor Plugin -> Bridge -> ROS 2.
 - Lidar
 - RGB_camera
 - Display screen
 
+For these new sensors, I have to write their URDF model, their gazebo&plugin file to add their specialitise and create the bridge.
+** Camera **
+- Required some conversion due to diff between coordonate system.
+- Will be using optical frame: Standard robot joints point X forward, Y left, Z up. But camera lenses expect Z to point forward,
+X right and Y down. To face that quirk, we have to create a tiny invisible joint to rotate the data.
+
+
 ------------
-- Fix switching falling issues
-- Write gazebo part for the sensors
+
+- Fix sync cmd rivz2 and gazebo
+- Fix transformation switching issue
