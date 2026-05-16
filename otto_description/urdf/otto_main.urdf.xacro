@@ -95,6 +95,15 @@
     <origin xyz="0 0 ${body_z_from_base}" rpy="0 0 0"/>
   </joint>
 
+  <!-- Base footprint -->
+  <link name="base_footprint"/>
+
+  <joint name="base_footprint_joint" type="fixed">
+      <parent link="base_footprint"/>
+      <child link="base_link"/>
+      <origin xyz="0 0 0.10" rpy="0 0 0"/> 
+  </joint>
+
   <!--=== LEFT LEG ASSEMBLY ===-->
 
   <!-- Servo block (cosmetic, fixed to body) -->
@@ -204,7 +213,7 @@
   </link>
 
   <!-- Foot revolute joint — rotates about Z (tilt foot) -->
-  <joint name="left_foot_joint" type="continuous">
+  <joint name="left_foot_joint" type="revolute">
     <parent link="left_leg_link"/>
     <child  link="left_foot_link"/>
     <origin xyz="0 0 ${foot_z_in_leg - foot_h/2.0}" rpy="0 0 0"/>
@@ -216,15 +225,34 @@
 
   <link name="left_foot_link">
     <xacro:inertia_cylinder m="${foot_mass}" r="${foot_r}" h="${foot_h}"/>
-    <visual>
+    
+    <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
         <cylinder radius="${foot_r}" length="${foot_h}"/>
       </geometry>
-      <material name="otto_grey"/>
+    </collision>
+  </link>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="left_foot_link"/>
+    <child  link="left_wheel_link"/>
+    <origin xyz="0 0 -0.01" rpy="0 0 0"/> <axis   xyz="0 0 1"/> </joint>
+
+  <link name="left_wheel_link">
+      <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="${foot_r}" length="${foot_h}"/>
+      </geometry>
+      <material name="otto_black"/>
     </visual>
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
       <geometry>
         <cylinder radius="${foot_r}" length="${foot_h}"/>
       </geometry>
@@ -336,7 +364,7 @@
     </collision>
   </link>
 
-  <joint name="right_foot_joint" type="continuous">
+  <joint name="right_foot_joint" type="revolute">
     <parent link="right_leg_link"/>
     <child  link="right_foot_link"/>
     <origin xyz="0 0 ${foot_z_in_leg - foot_h/2.0}" rpy="0 0 0"/>
@@ -357,6 +385,25 @@
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${foot_r}" length="${foot_h}"/>
+      </geometry>
+    </collision>
+  </link>
+
+   <joint name="right_wheel_joint" type="continuous">
+    <parent link="right_foot_link"/>
+    <child  link="right_wheel_link"/>
+    <origin xyz="0 0 -0.01" rpy="0 0 0"/> <axis   xyz="0 0 1"/> </joint>
+
+  <link name="right_wheel_link">
+     <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+   
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
       <geometry>
         <cylinder radius="${foot_r}" length="${foot_h}"/>
       </geometry>

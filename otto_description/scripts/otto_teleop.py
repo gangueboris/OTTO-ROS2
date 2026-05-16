@@ -46,8 +46,8 @@ class OttoTeleop(Node):
         PIVOT = 0.52
 
         # Driving speed variables
-        self.linear_speed = 1  # m/s
-        self.angular_speed = 2.0 # rad/s
+        self.linear_speed = 2  # m/s
+        self.angular_speed = 1.0 # rad/s
 
 
         # Gait dictionary (4 directionals)
@@ -164,19 +164,19 @@ class OttoTeleop(Node):
 
     def roll_forward(self):
         self.get_logger().info('Moving Forward...')
-        self._start_vel_loop(0.0, self.angular_speed)
+        self._start_vel_loop(self.linear_speed, 0.0)
 
     def roll_backward(self):
         self.get_logger().info('Moving Backward...')
-        self._start_vel_loop(0.0, -self.angular_speed)
+        self._start_vel_loop(-self.linear_speed, 0.0)
 
     def turn_left(self):
         self.get_logger().info('Turning Left...')
-        self._start_vel_loop(-self.linear_speed, 0.0)
+        self._start_vel_loop(0.0, self.angular_speed)
 
     def turn_right(self):
         self.get_logger().info('Turning Right...')
-        self._start_vel_loop(self.linear_speed, 0.0)
+        self._start_vel_loop(0.0, -self.angular_speed)
 
     def stop_rolling(self):
         self.get_logger().info('Stopping...')

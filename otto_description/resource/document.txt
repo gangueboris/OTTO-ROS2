@@ -187,6 +187,10 @@ We can use SLAM only in roll mode.
 ** To Fix **
 - Fix the slam odom issue
 
-- Fix sync cmd rivz2 and gazebo
+- Fix sync cmd rivz2 and gazebo: If I can't fix that using ros2_control, I could rewrite it by myself.
 - Fix transformation switching issue
 - Fix phone control issue
+
+
+Pause and decompose the problem from where the stand -> switch to roll and noticed the changing axes.
+Think about what I want to have and reflect from there.

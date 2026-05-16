@@ -10,7 +10,7 @@
 
         <!--== Actuators definition (Joints) ==-->
         <!-- Drive Wheels (Velocity ctrl)-->
-        <joint name="left_foot_joint">
+          <joint name="left_wheel_joint">
             <!-- Data to send -->
             <command_interface name="velocity"/>
             <command_interface name="position"/>
@@ -19,14 +19,25 @@
             <state_interface name="position"/>
         </joint>
         
-        <joint name="right_foot_joint">
+        <joint name="right_wheel_joint">
             <command_interface name="velocity"/>
             <command_interface name="position"/>
             <state_interface name="velocity"/>
             <state_interface name="position"/>
         </joint>
+         <!-- Bending knees (Position ctrl)-->
+        <joint name="left_foot_joint">
+            <command_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="position"/>
+        </joint>
+        
+        <joint name="right_foot_joint">
+            <command_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="position"/>
+        </joint>
 
-        <!-- Bending knees (Position ctrl)-->
         <joint name="left_hip_joint">
             <command_interface name="position"/>
             <state_interface name="position"/>
