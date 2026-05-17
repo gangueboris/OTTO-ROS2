@@ -181,11 +181,13 @@ ros2 run tf2_ros tf2_echo odom base_link
 
 Notes ********
 We can use SLAM only in roll mode.
+Once drive the robot manually and generate the map, we can save and use it later for autonomus navigation using nav2.
 
 
 ----------------------------------------
 ** To Fix **
-- Fix the slam odom issue
+- Save and reuse the map.
+
 
 - Fix sync cmd rivz2 and gazebo: If I can't fix that using ros2_control, I could rewrite it by myself.
 - Fix transformation switching issue
