@@ -183,16 +183,10 @@ Notes ********
 We can use SLAM only in roll mode.
 Once drive the robot manually and generate the map, we can save and use it later for autonomus navigation using nav2.
 
-
+ Fix sync cmd rivz2 and gazebo I just add an invisible wheels fixed to the feet and change their coordonates.
 ----------------------------------------
 ** To Fix **
 - Save and reuse the map.
 
-
-- Fix sync cmd rivz2 and gazebo: If I can't fix that using ros2_control, I could rewrite it by myself.
-- Fix transformation switching issue
 - Fix phone control issue
 
-
-Pause and decompose the problem from where the stand -> switch to roll and noticed the changing axes.
-Think about what I want to have and reflect from there.
