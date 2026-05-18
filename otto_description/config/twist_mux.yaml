@@ -1,0 +1,14 @@
+twist_mux:
+  ros__parameters:
+    use_sim_time: true
+    use_stamped: false
+    topics:
+      navigation:
+        topic: cmd_vel   # This is where Nav2 shouts its commands
+        timeout: 0.5
+        priority: 10   
+       
+      joystick:
+        topic: teleop_cmd_vel  # otto_teleop and switch_mode drive output
+        timeout: 0.5
+        priority: 50     # High priority so I can take control over the autonomous

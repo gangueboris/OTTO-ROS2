@@ -176,8 +176,48 @@ What is save_map ? and what is serial_map ?
 
 **  SLAM Toolbox **
 Installation: 'sudo apt install ros-jazzy-slam-toolbox ros-jazzy-nav2-map-server'
-Launch slam toolbox: 'ros2 launch slam_toolbox online_async_launch.py slam_params_file:=/home/boris/otto_ws/src/otto_description/config/slam.yaml use_sim_time:=true'
+Launch slam toolbox: 'ros2 launch slam_toolbox online_async_launch.py slam_params_file:=/home/boris/otto_ws/src/OTTO-ROS2/otto_description/config/slam.yaml use_sim_time:=true'
 ros2 run tf2_ros tf2_echo odom base_link
+
+It allows to generate a map of the environment while moving around using a lidar.
+We can use the generated map in the localization part.
+
+******** Localization *********
+Path A: Standard Nav2 Localization (AMCL)
+This is the industry standard for autonomous navigation. It uses your .pgm and .yaml files.
+It uses an algorithm called AMCL (Adaptive Monte Carlo Localization). When you launch it, it 
+randomly scatters thousands of "guesses" (particles) across your map. As OTTO drives and its 
+LiDAR pings the walls, the algorithm kills off the guesses that don't make sense, until all 
+the particles cluster tightly around OTTO's true position.
+
+Path B: SLAM Toolbox Native Localization
+This uses your .data and .posegraph files.
+Instead of running a separate AMCL node, you simply launch SLAM Toolbox again, but you change the mode: in your slam.yaml config from mapping to localization. SLAM Toolbox loads its mathematical 
+memory, locks the map so it won't draw any new walls, and just matches your current LiDAR feed 
+against its saved graph to figure out where you are.
+The map don't want to load for slam_localization and I don't know why ?
+
+launch! "ros2 launch slam_toolbox localization_launch.py slam_params_file:=/home/boris/otto_ws/src/OTTO-ROS2/otto_description/config/localization.yaml use_sim_time:=true"
+
+******** Navigation *********
+We have to specify a destination point and the robot has to safetly navigate to get there.
+Navigation = Robot position est (SLAM) + Obstacle awareness costMap(static map + live_lidar_data)
+To do the navigation, I will use nav2.
+
+Note: The controller is expecting the cmd_vel from /diff_cont/cmd_vel_unstamped but nav2 will be publishing it on /cmd_vel.
+To fix that, we will be using twist_mux.
+What is twist_mux ?
+It is a traffic cop for robot's motors. Since I will use web joystick to drive the robot, sometimes, I will 
+use nav2 to drive autonomusly. To avoid conflitual cmd, twist_mux is used to prioritize controller (joystick / nav2).
+
+
+*** Nav2 ***
+- nav2 & twist_mux installation: sudo apt install ros-jazzy-navigation2 ros-jazzy-nav2-bringup ros-jazzy-twist-mux
+- Official nav2 blueprint: "wget https://raw.githubusercontent.com/ros-planning/navigation2/jazzy/nav2_bringup/params/nav2_params.yaml"
+- nav2 launch: "ros2 launch nav2_bringup navigation_launch.py use_sim_time:=true params_file:=/home/boris/otto_ws/src/OTTO-ROS2/otto_description/config/nav2_params.yaml"
+- twist_mux launch: "ros2 run twist_mux twist_mux --ros-args --params-file ~/otto_ws/src/OTTO-ROS2/otto_description/config/twist_mux.yaml --remap cmd_vel_out:=/diff_drive_controller/cmd_vel"
+ros2 run twist_mux twist_mux --ros-args --params-file ~/otto_ws/src/OTTO-ROS2/otto_description/config/twist_mux.yaml
+
 
 Notes ********
 We can use SLAM only in roll mode.
@@ -186,7 +226,27 @@ Once drive the robot manually and generate the map, we can save and use it later
  Fix sync cmd rivz2 and gazebo I just add an invisible wheels fixed to the feet and change their coordonates.
 ----------------------------------------
 ** To Fix **
-- Save and reuse the map.
+- teleop_cmd doesn't work while nav2 (2D goal pose) work. check topic and ajust the message types (stamp and untamp) put all to stamp.
+Check one by one. and validate
+
+- Clarify your usage of AMCL (nav2)
+- Factorize using launch file for some node...
 
 - Fix phone control issue
 
+
+
+
+
+----------------------------------------------------------------
+
+- 1. ros2 launch otto_description spawner.launch.py
+- 2. websocket + ros2 run otto_description otto_teleop.py --> switch to roll mode
+- 3. to receive cmd from otto_teleop & nav2:  ros2 run twist_mux twist_mux --ros-args --params-file ~/otto_ws/src/OTTO-ROS2/otto_description/config/twist_mux.yaml
+- 3.1 get twist output and send to /diff_drive_controller/cmd_vel :  ros2 run otto_description twist_adapter.py  
+Don't understand why at this stage, teleop_cmd don't make move the robot.
+- 4. launch the a map: ros2 launch slam_toolbox localization_launch.py slam_params_file:=/home/boris/otto_ws/src/OTTO-ROS2/otto_description/config/localization.yaml use_sim_time:=true
+- 5. Launch nav3: ros2 launch nav2_bringup navigation_launch.py use_sim_time:=true params_file:=/home/boris/otto_ws/src/OTTO-ROS2/otto_description/config/nav2_params.yaml
+- 6. open rivz2
+In rviz2, setup: map > topic: /global costmap/cost/map
+color scheme: costmap

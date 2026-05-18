@@ -20,7 +20,7 @@ class OttoTeleop(Node):
         self.main_cb_group = MutuallyExclusiveCallbackGroup()
 
         self.publisher_pos_ = self.create_publisher(JointTrajectory, '/joint_trajectory_controller/joint_trajectory', 10)
-        self.publisher_vel_ = self.create_publisher(TwistStamped, '/diff_drive_controller/cmd_vel', 10)
+        self.publisher_vel_ = self.create_publisher(TwistStamped, '/teleop_cmd_vel', 10)
         self.subscriber_otto_cmd = self.create_subscription(String, '/otto_command', self.command_callback, 10, callback_group=self.main_cb_group)
 
         self.joint_names = ['left_hip_joint', 'left_foot_joint', 'right_hip_joint', 'right_foot_joint']

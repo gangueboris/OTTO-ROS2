@@ -17,7 +17,7 @@ class SwitchMode(Node):
         # Publisher to move the robot during switching
         self.traj_pub = self.create_publisher(JointTrajectory, '/joint_trajectory_controller/joint_trajectory', 10)
 
-        self.vel_pub = self.create_publisher(TwistStamped, '/diff_drive_controller/cmd_vel', 10)
+        self.vel_pub = self.create_publisher(TwistStamped, '/teleop_cmd_vel', 10)
 
         # Wait for the controller to run
         while not self.client.wait_for_service(timeout_sec=1.0):

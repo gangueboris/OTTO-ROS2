@@ -139,7 +139,7 @@
     </gazebo>
 
     <gazebo reference="left_foot_link">
-      <mu1>0.9</mu1>  <!-- forward friction: keep high -->
+      <mu1>0.9</mu1>  <!-- forward friction -->
       <mu2>0.9</mu2>   <!-- lateral friction:  -->
       <visual>
         <material>
@@ -159,6 +159,7 @@
         </material>
       </visual>
     </gazebo>
+
 
     <gazebo reference="right_back_support_link">
         <mu1>0</mu1>
