@@ -183,6 +183,19 @@ It allows to generate a map of the environment while moving around using a lidar
 We can use the generated map in the localization part.
 
 ******** Localization *********
+What it is: Calculating your exact X, Y coordinates and orientation on a known map.
+The Input: LiDAR laser scans + Odometry (wheel turns) + The pre-saved Map.
+The Output: A single data point called a Pose (position and orientation).
+The Tools: slam_toolbox (in localization mode) OR AMCL.
+Note: It does 0 driving, it just generate the map.
+
+mapping mode
+→ Use when creating a new map.
+The robot updates and expands the map while moving.
+localization mode
+→ Use when you already have a saved map.
+The robot only localizes itself inside the map without modifying it.
+
 Path A: Standard Nav2 Localization (AMCL)
 This is the industry standard for autonomous navigation. It uses your .pgm and .yaml files.
 It uses an algorithm called AMCL (Adaptive Monte Carlo Localization). When you launch it, it 
@@ -200,6 +213,12 @@ The map don't want to load for slam_localization and I don't know why ?
 launch! "ros2 launch slam_toolbox localization_launch.py slam_params_file:=/home/boris/otto_ws/src/OTTO-ROS2/otto_description/config/localization.yaml use_sim_time:=true"
 
 ******** Navigation *********
+----- Slam toolbox (localization) + nav2 ----
+What it is: Path planning and obstacle avoidance.
+The Input: Your current Pose (from Localization) + The Destination Goal + The Map + Live LiDAR (to see moving obstacles).
+The Output: Twist commands sent to your motors (speed and steering).
+The Tool: Nav2.
+
 We have to specify a destination point and the robot has to safetly navigate to get there.
 Navigation = Robot position est (SLAM) + Obstacle awareness costMap(static map + live_lidar_data)
 To do the navigation, I will use nav2.
@@ -218,6 +237,9 @@ use nav2 to drive autonomusly. To avoid conflitual cmd, twist_mux is used to pri
 - twist_mux launch: "ros2 run twist_mux twist_mux --ros-args --params-file ~/otto_ws/src/OTTO-ROS2/otto_description/config/twist_mux.yaml --remap cmd_vel_out:=/diff_drive_controller/cmd_vel"
 ros2 run twist_mux twist_mux --ros-args --params-file ~/otto_ws/src/OTTO-ROS2/otto_description/config/twist_mux.yaml
 
+----- AMCL + nav2 ----
+ACML uses save_map.pgm and save_map.yaml.
+
 
 Notes ********
 We can use SLAM only in roll mode.
@@ -226,8 +248,7 @@ Once drive the robot manually and generate the map, we can save and use it later
  Fix sync cmd rivz2 and gazebo I just add an invisible wheels fixed to the feet and change their coordonates.
 ----------------------------------------
 ** To Fix **
-- teleop_cmd doesn't work while nav2 (2D goal pose) work. check topic and ajust the message types (stamp and untamp) put all to stamp.
-Check one by one. and validate
+- Now that everything is setup, I don't understand 
 
 - Clarify your usage of AMCL (nav2)
 - Factorize using launch file for some node...
@@ -241,7 +262,7 @@ Check one by one. and validate
 ----------------------------------------------------------------
 
 - 1. ros2 launch otto_description spawner.launch.py
-- 2. websocket + ros2 run otto_description otto_teleop.py --> switch to roll mode
+- 2. websocket:ros2 launch rosbridge_server rosbridge_websocket_launch.xml port:=9091 + ros2 run otto_description otto_teleop.py --> switch to roll mode
 - 3. to receive cmd from otto_teleop & nav2:  ros2 run twist_mux twist_mux --ros-args --params-file ~/otto_ws/src/OTTO-ROS2/otto_description/config/twist_mux.yaml
 - 3.1 get twist output and send to /diff_drive_controller/cmd_vel :  ros2 run otto_description twist_adapter.py  
 Don't understand why at this stage, teleop_cmd don't make move the robot.
@@ -250,3 +271,10 @@ Don't understand why at this stage, teleop_cmd don't make move the robot.
 - 6. open rivz2
 In rviz2, setup: map > topic: /global costmap/cost/map
 color scheme: costmap
+
+
+
+When and in which conditions do we use 2D goal pose ?
+In slam toolbox, when do we set mode to localization and when do set to mapping ?
+Mapping is when we navigate, generate and save the map. 
+mode localization is when we load the map saved to 

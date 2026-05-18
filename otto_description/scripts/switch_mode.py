@@ -5,7 +5,7 @@ from rclpy.node import Node
 from controller_manager_msgs.srv import SwitchController        # it is a service
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from builtin_interfaces.msg import Duration
-from geometry_msgs.msg import TwistStamped
+from geometry_msgs.msg import Twist
 
 
 class SwitchMode(Node):
@@ -17,7 +17,7 @@ class SwitchMode(Node):
         # Publisher to move the robot during switching
         self.traj_pub = self.create_publisher(JointTrajectory, '/joint_trajectory_controller/joint_trajectory', 10)
 
-        self.vel_pub = self.create_publisher(TwistStamped, '/teleop_cmd_vel', 10)
+        self.vel_pub = self.create_publisher(Twist, '/teleop_cmd_vel', 10)
 
         # Wait for the controller to run
         while not self.client.wait_for_service(timeout_sec=1.0):
@@ -67,14 +67,13 @@ class SwitchMode(Node):
         msg.points.append(point)
         self.traj_pub.publish(msg)
 
-        # Wait for the trajectory to complete — 2s confirmed working with Gazebo sim lag
-        self.ros_sleep(2.5)
+        # Wait for the trajectory to complete - 4s confirmed working with Gazebo sim lag
+        self.ros_sleep(4)
     
 
     def stop_rolling(self):
         # Send velocity (0,0) and wait
-        msg = TwistStamped()
-        msg.header.stamp = self.get_clock().now().to_msg() # All twist fields are zero by default
+        msg = Twist()
         self.vel_pub.publish(msg)
         self.get_logger().info('Stopping roll...')
 
