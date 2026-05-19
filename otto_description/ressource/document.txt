@@ -252,11 +252,11 @@ I separate the project into:
 - web_controller: web_control.launch.py
 
 ----------------------------------------
-** To Fix **
-- Factorize using launch file for some node...
-
+** To Do **
+- List all small details to update (speed, drive orientation, create a beautiful map with obstacles)
 - Fix phone control issue
 
+- Record the simulation
 
 
 
