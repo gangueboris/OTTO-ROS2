@@ -139,7 +139,7 @@
     </gazebo>
 
     <gazebo reference="left_foot_link">
-      <mu1>0.9</mu1>  <!-- forward friction -->
+      <mu1>0.0</mu1>  <!-- forward friction -->
       <mu2>0.9</mu2>   <!-- lateral friction:  -->
       <visual>
         <material>
@@ -150,7 +150,7 @@
     </gazebo>
 
     <gazebo reference="right_foot_link">
-      <mu1>0.9</mu1>                               <!--Friction/gripping on the floor.-->
+      <mu1>0.0</mu1>                               <!--Friction/gripping on the floor.-->
       <mu2>0.9</mu2>
       <visual>
         <material>

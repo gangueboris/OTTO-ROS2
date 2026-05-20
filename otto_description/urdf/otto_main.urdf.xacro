@@ -14,7 +14,7 @@
   <xacro:property name="body_x"    value="0.075"/>   <!-- width  -->
   <xacro:property name="body_y"    value="0.060"/>   <!-- depth  -->
   <xacro:property name="body_z"    value="0.065"/>   <!-- height -->
-  <xacro:property name="body_mass" value="0.120"/>
+  <xacro:property name="body_mass" value="0.07"/>
 
   <!-- Leg segment -->
   <xacro:property name="leg_x"    value="0.020"/>

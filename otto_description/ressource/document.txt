@@ -253,30 +253,32 @@ I separate the project into:
 
 ----------------------------------------
 ** To Do **
-- List all small details to update (speed, drive orientation, create a beautiful map with obstacles)
-- Fix phone control issue
 
-- Record the simulation
-
+- Think and redesign the webapp controller
+- Upgrade the simulation world
 
 
 
-----------------------------------------------------------------
------ Slam toolbox (localization) + nav2 ----
-- 1. ros2 launch otto_description spawner.launch.py
-- 2. websocket:ros2 launch rosbridge_server rosbridge_websocket_launch.xml port:=9091 + ros2 run otto_description otto_teleop.py --> switch to roll mode
-- 3. to receive cmd from otto_teleop & nav2:  ros2 run twist_mux twist_mux --ros-args --params-file ~/otto_ws/src/OTTO-ROS2/otto_description/config/twist_mux.yaml
-- 3.1 get twist output and send to /diff_drive_controller/cmd_vel :  ros2 run otto_description twist_adapter.py  
-Don't understand why at this stage, teleop_cmd don't make move the robot.
-- 4. launch the a map: ros2 launch slam_toolbox localization_launch.py slam_params_file:=/home/boris/otto_ws/src/OTTO-ROS2/otto_description/config/localization.yaml use_sim_time:=true
-- 5. Launch nav2: ros2 launch nav2_bringup navigation_launch.py use_sim_time:=true params_file:=/home/boris/otto_ws/src/OTTO-ROS2/otto_description/config/nav2_params.yaml
-- 6. open rivz2
-In rviz2, setup: map > topic: /global costmap/cost/map
-color scheme: costmap
+===== Check up =====
+- Conrolled Walking mode ok
+- Controlled rolling mode ok
+- Walking then switch to rolling ok
+- rolling the switch to walking   ok
+- Autonomous navigation rolling mode (map is messy)
 
 
------ AMCL + nav2 ---- (more efficient)
-Instead of running Localization and Navigation in two separate terminals like we did with SLAM, we are going to use Nav2's bringup_launch.py. 
-This script spins up the Map Server to read your .yaml file, starts AMCL, and boots up the path planners all at once.
-1. ros2 launch nav2_bringup bringup_launch.py use_sim_time:=true map:=/home/boris/otto_ws/save_map.yaml params_file:=/home/boris/otto_ws/src/OTTO-ROS2/otto_description/config/nav2_params.yaml
+=== Record the simulation ===
+** Walking mode **
+- Controlled walking robot is walking 
+- Autonomous walking
 
+** Rolling mode **
+- Controlled navigation: The robot walk in any direction in Gazebo, via webapp controller
+- Autonomous navigation: Nav2 goal reached in simulation with no manual intervention 
+
+=========== How to run the project ? =================
+1. colcon build --packages-select otto_description --symlink-select
+2. ros2 launch otto_description simulation.launch.py
+3. ros2 launch otto_description web_control.launch.py
+4. ros2 launch otto_description brain.launch.py
+5. rviz2
