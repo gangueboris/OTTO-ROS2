@@ -255,8 +255,8 @@ I separate the project into:
 ** To Do **
 
 - Think and redesign the webapp controller
-- Upgrade the simulation world
-
+-Fix goal navigation & false obstacle issues
+- Reduce wheel size
 
 
 ===== Check up =====
@@ -282,3 +282,5 @@ I separate the project into:
 3. ros2 launch otto_description web_control.launch.py
 4. ros2 launch otto_description brain.launch.py
 5. rviz2
+
+

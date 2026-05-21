@@ -6,11 +6,10 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    # Find the directories for our packages
     otto_desc_dir = get_package_share_directory('otto_description')
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
 
-    # Setup the Twist Mux Node
+    # 1. Setup the Twist Mux Node
     twist_mux_node = Node(
         package='twist_mux',
         executable='twist_mux',
@@ -18,21 +17,21 @@ def generate_launch_description():
         parameters=[os.path.join(otto_desc_dir, 'config', 'twist_mux.yaml')]
     )
 
-    # Setup the custom Python Adapter Node
+    # 2. Setup your custom Python Adapter Node
     twist_adapter_node = Node(
         package='otto_description', 
         executable='twist_adapter.py',
         name='twist_adapter'
     )
 
-    # Include Nav2 + AMCL Bringup script
-    nav2_launch = IncludeLaunchDescription(
+    # 3. Include Nav2 in SLAM Mode
+    nav2_mapping_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')
         ),
         launch_arguments={
             'use_sim_time': 'true',
-            'map': '/home/boris/otto_ws/src/OTTO-ROS2/otto_description/maps/save_map.yaml',
+            'slam': 'True',    # Turns on SLAM Toolbox, turns off AMCL
             'params_file': os.path.join(otto_desc_dir, 'config', 'nav2_params.yaml')
         }.items()
     )
@@ -40,5 +39,5 @@ def generate_launch_description():
     return LaunchDescription([
         twist_mux_node,
         twist_adapter_node,
-        nav2_launch
+        nav2_mapping_launch
     ])

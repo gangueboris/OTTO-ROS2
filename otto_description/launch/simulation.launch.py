@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -9,7 +9,7 @@ import xacro
 def generate_launch_description():
     pkg_name = 'otto_description'
     urdf_path = 'urdf/otto_main.urdf.xacro'
-    world_path = os.path.join(get_package_share_directory(pkg_name), 'worlds', 'custom_world.sdf')
+    world_path = os.path.join(get_package_share_directory(pkg_name), 'worlds', 'warehouse_world.sdf')
 
     # Process the URDF
     xacro_file = os.path.join(get_package_share_directory(pkg_name), urdf_path)
@@ -32,45 +32,59 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': f'-r {world_path}', 'on_exit_shutdown': 'true'}.items(),     # -r : run, empty.sdf: the world to load
+        #launch_arguments={'gz_args': '-r empty.sdf', 'on_exit_shutdown': 'true'}.items(),     # -r : run, empty.sdf  : the world to load 
+        launch_arguments={'gz_args': f'-r {world_path}', 'on_exit_shutdown': 'true'}.items(),
     )
 
     # Spawn the Robot in Gazebo
-    spawn_entity = Node(
-        package='ros_gz_sim',
-        executable='create',
-        output='screen',
-        arguments=[
-            '-string', robot_description_raw,
-            '-name', 'otto',
-            '-z', '0.1'                    # spawn height (10 cm above ground), avoids collision with ground at spawn
-        ]
+
+    spawn_entity = TimerAction(
+        period=3.0,
+        actions=[Node(
+            package='ros_gz_sim',
+            executable='create',
+            output='screen',
+            arguments=[
+                '-string', robot_description_raw,
+                '-name', 'otto',
+                '-z', '0.1'                                 # spawn height (10 cm above ground), avoids collision with ground at spawn
+            ]
+        )]
     )
 
     # Spawn joint_state_broadcaster
-    spawn_broadcaster = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['joint_state_broadcaster', '--controller-manager', '/controller_manager'],
-        output='screen'
+    spawn_broadcaster = TimerAction(
+        period=8.0,
+        actions=[Node(
+            package='controller_manager',
+            executable='spawner',
+            arguments=['joint_state_broadcaster', '--controller-manager', '/controller_manager'],
+            output='screen'
+        )]
+    )
+    
+    # Spawn joint_trajectory_controller
+    spawn_trajectory_controller = TimerAction(
+        period=8.0,
+        actions=[Node(
+            package='controller_manager',
+            executable='spawner',
+            arguments=['joint_trajectory_controller', '--controller-manager', '/controller_manager'],
+            output='screen'
+        )]
     )
 
     # Spawn diff_drive_controller
     
-    spawn_diff_drive = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['diff_drive_controller', '--controller-manager', '/controller_manager', '--inactive'],
-        output='screen'
-    )
-    
-    # Spawn joint_trajectory_controller
-    spawn_trajectory_controller = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['joint_trajectory_controller', '--controller-manager', '/controller_manager'],
-        output='screen'
-    )
+    spawn_diff_drive = TimerAction(
+            period=8.0,
+            actions=[Node(
+                package='controller_manager',
+                executable='spawner',
+                arguments=['diff_drive_controller', '--controller-manager', '/controller_manager', '--inactive'],
+                output='screen'
+            )]
+        )
 
     bridge = Node(
         package='ros_gz_bridge',
