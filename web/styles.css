@@ -1,0 +1,211 @@
+/* NEO-BRUTALIST RESET */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', Courier, monospace; /* Blueprint aesthetic */
+    font-weight: 900;
+    user-select: none; /* Prevents text highlighting on mobile */
+    -webkit-touch-callout: none; 
+}
+
+body {
+    background-color: #f0f0f0;
+    color: #000;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Locks scrolling */
+}
+
+/* --- TOP HEADER --- */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    border-bottom: 4px solid #000;
+    background: #fff;
+    height: 60px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #000;
+}
+.dot.offline { background: #ff3333; }
+.dot.online { background: #33ff33; }
+
+.icon-btn {
+    background: #fff;
+    border: 3px solid #000;
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 #000;
+}
+.icon-btn:active { box-shadow: 0 0 0 #000; transform: translate(2px, 2px); }
+
+/* --- CUSTOM PILL TOGGLES --- */
+.toggle-container, .sub-toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.toggle-label { font-size: 16px; letter-spacing: 1px; }
+
+/* Hide the actual checkbox */
+.custom-toggle { display: none; }
+
+/* The Pill Track */
+.toggle-track {
+    display: inline-block;
+    width: 80px;
+    height: 36px;
+    background: #000;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    border: 3px solid #000;
+}
+
+/* The Sliding Circle */
+.toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 26px;
+    height: 26px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.3s ease;
+}
+
+/* Move circle when checked (Right side) */
+.custom-toggle:checked + .toggle-track::after {
+    transform: translateX(44px);
+}
+
+/* --- MAIN DASHBOARD LAYOUT --- */
+.dashboard {
+    display: flex;
+    flex: 1;
+    padding: 15px;
+    gap: 15px;
+}
+.control-zone {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.left-zone { flex: 1; }
+.center-zone { flex: 2; position: relative; }
+.right-zone { flex: 1; justify-content: flex-end; padding-bottom: 20px;}
+
+/* --- D-PAD (DEAD-MAN SWITCH) --- */
+.d-pad {
+    display: grid;
+    grid-template-columns: 60px 60px 60px;
+    grid-template-rows: 60px 60px 60px;
+    gap: 5px;
+}
+.d-btn {
+    background: #fff;
+    border: 4px solid #000;
+    font-size: 24px;
+    box-shadow: 3px 3px 0 #000;
+    touch-action: none; /* Crucial for immediate touch response */
+}
+.d-btn:active, .d-btn.active {
+    background: #000;
+    color: #fff;
+    box-shadow: 0 0 0 #000;
+    transform: translate(3px, 3px);
+}
+.up { grid-column: 2; grid-row: 1; }
+.left { grid-column: 1; grid-row: 2; }
+.right { grid-column: 3; grid-row: 2; }
+.down { grid-column: 2; grid-row: 3; }
+.d-center { grid-column: 2; grid-row: 2; background: #000; border-radius: 50%; transform: scale(0.4);}
+
+/* --- VIEWPORT --- */
+.viewport {
+    width: 100%;
+    height: 100%;
+    border: 5px solid #000;
+    background: #222;
+    box-shadow: 5px 5px 0 #000;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+.feed-layer {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 20px;
+    letter-spacing: 2px;
+}
+.hidden { display: none !important; }
+
+/* --- E-STOP --- */
+.e-stop {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #ff3333;
+    border: 5px solid #000;
+    color: #000;
+    font-size: 20px;
+    box-shadow: 4px 4px 0 #000;
+}
+.e-stop:active {
+    box-shadow: 0 0 0 #000;
+    transform: translate(4px, 4px);
+    background: #cc0000;
+}
+
+/* --- ENGINEERING DRAWER --- */
+.drawer {
+    position: fixed;
+    top: 60px; /* Below header */
+    right: 0;
+    bottom: 0;
+    width: 300px;
+    background: #fff;
+    border-left: 5px solid #000;
+    box-shadow: -10px 0 20px rgba(0,0,0,0.2);
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transform: translateX(100%); /* Hidden by default */
+    z-index: 100;
+}
+.drawer:not(.hidden) {
+    transform: translateX(0);
+}
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 3px solid #000;
+    background: #f0f0f0;
+}
+.drawer-content { padding: 20px; }
+.settings-group label { display: block; margin-top: 20px; margin-bottom: 5px; }
+input[type=range] { width: 100%; margin-bottom: 10px; accent-color: #000;}

@@ -18,6 +18,13 @@ def generate_launch_description():
         launch_arguments={'port': '9091'}.items()
     )
 
+    # Web video server
+    web_video_server_node = Node(
+        package='web_video_server',
+        executable='web_video_server',
+        name='web_video_server'
+    )
+
     # Setup your custom Python Teleop Node
     teleop_node = Node(
         package='otto_description', 
@@ -28,5 +35,6 @@ def generate_launch_description():
     # Launch them both!
     return LaunchDescription([
         rosbridge_launch,
+        web_video_server_node,
         teleop_node
     ])

@@ -251,16 +251,51 @@ I separate the project into:
 - brain: brain.launch.py
 - web_controller: web_control.launch.py
 
+
+********* Web controller interface upgrading ***********
+- At the top a single button (like on/off switch btn) for Walk/Roll Mode
+- At the left a joytick for control (top, down, left and right)
+- At the right The speed management only sees for the current mode. Could be hidden. 
+We could click to open and update the speed like how settings works.
+- The screen in the middle. Where when we are in walking mode, we can only get the camera flux. And 
+when we are in rolling mode, we can switch between camera flux and mapping for autonomous navigation.
+In mapping mode, to be able to move to certain point, each time, the user has to select and position a waypoint
+on the map. The user could be able to zoom in/ zoom out, zoom around in mapping visual.
+
+
+- Paid attention to detail to ensure a swooth, clear, intuitive interaction with the user.
+
+
+** roslibjs ***
+roslibjs.
+
+To do this right, we need to handle three specific data streams:
+
+The Core Connection: Establishing the WebSocket handshake with ROS 2.
+
+The Command Stream: Sending your D-Pad and Slider data as std_msgs/String messages to your Python script.
+
+The Telemetry Stream (Camera): Since streaming raw image data over WebSockets is extremely slow and causes lag,
+robotics engineers use a dedicated ROS 2 package called web_video_server. It intercepts Gazebo's camera and turns it into a high-speed
+HTTP video stream that the browser can render natively in an <img> tag.
+
+*** Testing the video web_video_server
+sudo apt install ros-jazzy-web-video-server  # (Run this once just to make sure it's installed)
+ros2 launch rosbridge_server rosbridge_websocket_launch.xml port:=9091 & ros2 run web_video_server web_video_server
+
+
+** ros2djs ***
+It takes the raw, massive grid data from the /map topic and draws it onto an HTML5 Canvas using a gaming graphics engine called EaselJS.
+
+
+Set the default mode to walk in the navigation
 ----------------------------------------
 ** To Do **
 
-- Think and redesign the webapp controller
--Fix goal navigation & false obstacle issues
 - Reduce wheel size
-- Redisign the web_control and implement
-
-- The map is not clear, it not well mapped
-- The robot drift a lot a loose it initial position
+- On web_control, fix the stop
+- Fix the mapping issue
+- Update the visual to add camera and map in roll mode
 
 
 ===== Check up =====
