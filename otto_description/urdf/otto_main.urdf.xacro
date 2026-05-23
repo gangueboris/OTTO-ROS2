@@ -61,7 +61,7 @@
   <!--=== BODY / HEAD LINK ===-->
 
   <link name="body_link">
-    <xacro:inertia_box m="${body_mass}" x="${body_x}" y="${body_y}" z="${body_z}"/>
+    <xacro:inertia_box m="${body_mass/2}" x="${body_x}" y="${body_y}" z="${-body_z/2}"/>
 
     <!-- Torso + head box (grey top, blue sides) — single visual block -->
     <visual>

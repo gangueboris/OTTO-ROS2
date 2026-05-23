@@ -257,6 +257,10 @@ I separate the project into:
 - Think and redesign the webapp controller
 -Fix goal navigation & false obstacle issues
 - Reduce wheel size
+- Redisign the web_control and implement
+
+- The map is not clear, it not well mapped
+- The robot drift a lot a loose it initial position
 
 
 ===== Check up =====
@@ -277,7 +281,7 @@ I separate the project into:
 - Autonomous navigation: Nav2 goal reached in simulation with no manual intervention 
 
 =========== How to run the project ? =================
-1. colcon build --packages-select otto_description --symlink-select
+1. colcon build --packages-select otto_description --symlink-install
 2. ros2 launch otto_description simulation.launch.py
 3. ros2 launch otto_description web_control.launch.py
 4. ros2 launch otto_description brain.launch.py
