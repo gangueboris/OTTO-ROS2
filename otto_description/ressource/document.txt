@@ -293,9 +293,9 @@ Set the default mode to walk in the navigation
 ** To Do **
 
 - Reduce wheel size
-- On web_control, fix the stop
-- Fix the mapping issue
-- Update the visual to add camera and map in roll mode
+- Rewrite all comment
+- Record sample web_video_server
+- organize the process for the blog
 
 
 ===== Check up =====

@@ -10,7 +10,7 @@ slam_toolbox:
 
      # LOCALIZATION
     mode: localization 
-    map_file_name: /home/boris/otto_ws/serialize_map                # For the localization
+    map_file_name: /home/boris/otto_ws/src/OTTO-ROS2/otto_description/maps/serialize_map                # For the localization
     # Tell the robot roughly where it is starting (0,0 is where Gazebo spawns it)
     map_start_pose: [0.0, 0.0, 0.0]
 

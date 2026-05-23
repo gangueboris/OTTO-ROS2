@@ -9,6 +9,7 @@ def generate_launch_description():
     # Find the directories for our packages
     otto_desc_dir = get_package_share_directory('otto_description')
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
+    slam_toolbox_dir = get_package_share_directory('slam_toolbox')
 
     # Setup the Twist Mux Node
     twist_mux_node = Node(
@@ -25,20 +26,33 @@ def generate_launch_description():
         name='twist_adapter'
     )
 
-    # Include Nav2 + AMCL Bringup script
+    # 1. PURE NAVIGATION (NO AMCL)
+    # We swap 'bringup_launch.py' for 'navigation_launch.py' to leave localization to SLAM
     nav2_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(nav2_bringup_dir, 'launch', 'bringup_launch.py')
+            os.path.join(nav2_bringup_dir, 'launch', 'navigation_launch.py')
         ),
         launch_arguments={
             'use_sim_time': 'true',
-            'map': '/home/boris/otto_ws/src/OTTO-ROS2/otto_description/maps/save_map.yaml',
             'params_file': os.path.join(otto_desc_dir, 'config', 'nav2_params.yaml')
+        }.items()
+    )
+
+    # 2. LIFELONG MAPPING (SLAM TOOLBOX)
+    # We launch SLAM in async mode, overriding its default parameters with our localization file
+    slam_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(slam_toolbox_dir, 'launch', 'online_async_launch.py')
+        ),
+        launch_arguments={
+            'use_sim_time': 'true',
+            'slam_params_file': os.path.join(otto_desc_dir, 'config', 'mapper_params_localization.yaml')
         }.items()
     )
 
     return LaunchDescription([
         twist_mux_node,
         twist_adapter_node,
-        nav2_launch
+        slam_launch,   # Start Map Reading/Writing
+        nav2_launch    # Start Path Planning
     ])

@@ -209,3 +209,41 @@ body {
 .drawer-content { padding: 20px; }
 .settings-group label { display: block; margin-top: 20px; margin-bottom: 5px; }
 input[type=range] { width: 100%; margin-bottom: 10px; accent-color: #000;}
+
+
+
+/* --- THE TACTICAL VIEWPORT --- */
+#center-viewport {
+    position: relative;
+    width: 60vw;
+    height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.feed-box {
+    border: 4px solid #000;
+    box-shadow: 6px 6px 0px #000;
+    background-color: #111111;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* Super smooth shrinking animation */
+}
+
+#video-stream, #map-feed canvas {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+}
+
+/* --- SMALL ROLL-MODE CAMERA --- */
+#small-camera-feed {
+    width: 220px;               /* Adjust this if you want it wider/narrower */
+    aspect-ratio: 4 / 3;
+    border: 4px solid #000;
+    box-shadow: 4px 4px 0px #000;
+    background-color: #111111;
+    margin-bottom: 30px;        /* Adds space between the camera and the STOP button */
+    overflow: hidden;
+}

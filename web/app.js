@@ -51,14 +51,20 @@ function sendOttoCommand(commandString) {
     console.log(`[TX] /otto_command -> '${commandString}'`);
 }
 
+// --- DEFINE NAV2 ACTION CLIENT ---
+const navClient = new ROSLIB.ActionClient({
+    ros: ros,
+    serverName: '/navigate_to_pose',
+    actionName: 'nav2_msgs/action/NavigateToPose'
+});
 
 // ==========================================
 // DOM ELEMENTS & UI LOGIC
 // ==========================================
 const masterToggle = document.getElementById('master-toggle');
-const viewportToggleWrapper = document.getElementById('viewport-toggle-wrapper');
-const viewportToggle = document.getElementById('viewport-toggle');
+const smallCameraFeed = document.getElementById('small-camera-feed');
 const cameraFeed = document.getElementById('camera-feed');
+const smallVideoStream = document.getElementById('small-video-stream');
 const mapFeed = document.getElementById('map-feed');
 
 const btnSettings = document.getElementById('btn-settings');
@@ -76,29 +82,29 @@ masterToggle.addEventListener('change', (e) => {
     sendOttoCommand(`switch_${robotMode}`);
 
     if (robotMode === 'walk') {
-        viewportToggleWrapper.classList.add('hidden');
+        // --- WALK MODE ---
         cameraFeed.classList.remove('hidden');
         mapFeed.classList.add('hidden');
+        smallCameraFeed.classList.add('hidden');
+        
         rollSettings.classList.add('hidden');
         walkSettings.classList.remove('hidden');
-    } else {
-        viewportToggleWrapper.classList.remove('hidden');
-        walkSettings.classList.add('hidden');
-        rollSettings.classList.remove('hidden');
-        viewportToggle.dispatchEvent(new Event('change')); 
-    }
-});
 
-// --- 2. VIEWPORT TOGGLE (VISION / MAP) ---
-viewportToggle.addEventListener('change', (e) => {
-    if (robotMode === 'walk') return; 
-    const isMap = e.target.checked;
-    if (isMap) {
+        // Route video to the BIG screen, kill the small one
+        videoStream.src = videoUrl;
+        smallVideoStream.src = ""; 
+    } else {
+        // --- ROLL MODE ---
         cameraFeed.classList.add('hidden');
         mapFeed.classList.remove('hidden');
-    } else {
-        mapFeed.classList.add('hidden');
-        cameraFeed.classList.remove('hidden');
+        smallCameraFeed.classList.remove('hidden');
+        
+        walkSettings.classList.add('hidden');
+        rollSettings.classList.remove('hidden');
+
+        // Route video to the SMALL screen, kill the big one
+        smallVideoStream.src = videoUrl;
+        videoStream.src = ""; 
     }
 });
 
@@ -169,8 +175,31 @@ dBtns.forEach(btn => {
 // --- 5. E-STOP ---
 btnStop.addEventListener('pointerdown', (e) => {
     e.preventDefault();
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Aggressive haptic pattern
+    
+    console.warn('[E-STOP] ACTIVATED. Halting all subsystems.');
+
+    // 1. Kill Manual Physics (Walking & Teleop)
     sendOttoCommand('stop');
+
+    // 2. Kill Autonomous Navigation (Nav2)
+    // Calling cancel() without a specific goal ID automatically aborts everything
+    navClient.cancel();
+
+    // 3. Clear the UI Visuals
+    // Hide the red destination marker so the operator knows the goal is wiped
+    if (typeof goalMarker !== 'undefined') {
+        goalMarker.visible = false;
+    }
+
+    // 4. Brutalist UI Flash
+    // Flash the button inverted colors for 200ms to confirm the strike
+    btnStop.style.backgroundColor = '#000000';
+    btnStop.style.color = '#ff3333';
+    setTimeout(() => {
+        btnStop.style.backgroundColor = ''; 
+        btnStop.style.color = '';
+    }, 200);
 });
 
 
@@ -181,58 +210,80 @@ btnStop.addEventListener('pointerdown', (e) => {
 // 1. Setup the Map Viewer (The Canvas)
 const mapViewer = new ROS2D.Viewer({
     divID: 'map-feed',
-    width: window.innerWidth * 0.6,
+    width: window.innerWidth * 0.6,  
     height: window.innerHeight * 0.7,
-    background: '#111111'
+    background: '#111111'            
 });
 
 // 2. Setup the Map Client (Pulls data from /map topic)
 const gridClient = new ROS2D.OccupancyGridClient({
     ros: ros,
     rootObject: mapViewer.scene,
-    continuous: true
+    continuous: true // True = Live updates (SLAM). False = Static map (AMCL)
 });
 
+// Center the map once it loads (USING YOUR EXACT WORKING MATH)
 gridClient.on('change', () => {
     mapViewer.scaleToDimensions(gridClient.currentGrid.width, gridClient.currentGrid.height);
     mapViewer.shift(gridClient.currentGrid.pose.position.x, gridClient.currentGrid.pose.position.y);
 });
+// ==========================================
+// RVIZ-LITE: LIVE ROBOT TRACKING
+// ==========================================
+// The scene is scaled in meters! 
+// Use raw createjs Shape for a circle
+const robotMarker = new createjs.Shape();
+const diameter = 0.2; // maintaining the original diameter in meters
+const radius = diameter / 2; // radius in meters
 
-// ==========================================
-// NEW: LIVE ROBOT TRACKING
-// ==========================================
-// Create a stark, high-contrast tracking arrow for OTTO
-const robotMarker = new ROS2D.NavigationArrow({
-    size: 0.4,           // Size in meters on the map
-    strokeSize: 0.05,
-    fillColor: createjs.Graphics.getRGB(0, 255, 0, 1), // Bright green
-    pulse: false
-});
+robotMarker.graphics.setStrokeStyle(0.03); // maintaining stroke width in meters
+robotMarker.graphics.beginStroke(createjs.Graphics.getRGB(0, 0, 0, 1)); // keep black stroke
+robotMarker.graphics.beginFill(createjs.Graphics.getRGB(0, 0, 255, 1)); // blue fill, for the blue cercle
+robotMarker.graphics.drawCircle(0, 0, radius); // draw circle with correct radius in meters
 mapViewer.scene.addChild(robotMarker);
 
-// Listen to OTTO's live odometry to move the marker
+// ==========================================
+// THE GOAL MARKER
+// ==========================================
+const goalMarker = new createjs.Shape();
+// Draw a bright red circle, 0.2 meters in radius
+goalMarker.graphics.beginFill(createjs.Graphics.getRGB(255, 50, 50, 0.8)).drawCircle(0, 0, 0.05);
+goalMarker.visible = false; // Hidden until you click
+mapViewer.scene.addChild(goalMarker);
+
+// A simple loop to check if OTTO reached the goal
+setInterval(() => {
+    if (!goalMarker.visible) return;
+    
+    // Calculate distance between OTTO and the Goal using Pythagorean theorem
+    const dx = robotMarker.x - goalMarker.x;
+    const dy = robotMarker.y - goalMarker.y;
+    const distance = Math.sqrt(dx*dx + dy*dy);
+    
+    if (distance < 0.25) { // If he is within 25 centimeters
+        goalMarker.visible = false;
+        console.log("[NAV] Goal Reached! Marker cleared.");
+    }
+}, 500); // Check twice a second
+
 const odomListener = new ROSLIB.Topic({
     ros: ros,
-    name: '/odom', // Uses diff_drive_controller odometry for smooth tracking
+    name: '/diff_drive_controller/odom',
     messageType: 'nav_msgs/msg/Odometry'
 });
 
 odomListener.subscribe((msg) => {
-    // 1. Update Position (Note: ros2djs inverts the Y axis for HTML canvas rendering)
+    // Because the map scales to meters, we just use raw ROS coordinates!
     robotMarker.x = msg.pose.pose.position.x;
     robotMarker.y = -msg.pose.pose.position.y; 
 
-    // 2. Update Rotation (Convert Quaternion to Euler Yaw)
+    // Convert Quaternion to Euler Yaw
     const q = msg.pose.pose.orientation;
     const yaw = Math.atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z));
-    
-    // Convert radians to degrees and invert for canvas rendering
     robotMarker.rotation = -yaw * (180 / Math.PI);
 });
-
-
 // ==========================================
-// NEW: PAN, ZOOM, AND CLICK-TO-DRIVE
+// RVIZ-LITE: PAN, ZOOM & GOAL DISPATCH
 // ==========================================
 const goalPublisher = new ROSLIB.Topic({
     ros: ros,
@@ -240,62 +291,89 @@ const goalPublisher = new ROSLIB.Topic({
     messageType: 'geometry_msgs/msg/PoseStamped'
 });
 
-// --- ZOOM LOGIC (Mouse Wheel) ---
-const canvasElement = document.querySelector('#map-feed canvas');
-canvasElement.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1; // Scroll down = out, up = in
-    mapViewer.scene.scaleX *= zoomFactor;
-    mapViewer.scene.scaleY *= zoomFactor;
-});
+// Delay grabbing the canvas slightly to ensure ros2djs has injected it
+setTimeout(() => {
+    const canvas = document.querySelector('#map-feed canvas');
+    if (!canvas) return;
 
-// --- PAN VS CLICK LOGIC (Touch & Mouse) ---
-let isDraggingMap = false;
-let startStageX, startStageY;
-let startSceneX, startSceneY;
+    // --- MOUSE WHEEL ZOOM ---
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const zoom = e.deltaY < 0 ? 1.1 : 0.9;
+        mapViewer.scene.scaleX *= zoom;
+        mapViewer.scene.scaleY *= zoom;
+    });
 
-// When touch/mouse goes down, record the starting coordinates
-mapViewer.scene.addEventListener('stagemousedown', (e) => {
-    isDraggingMap = true;
-    startStageX = e.stageX;
-    startStageY = e.stageY;
-    startSceneX = mapViewer.scene.x;
-    startSceneY = mapViewer.scene.y;
-});
+    // --- PAN VS CLICK LOGIC ---
+    let isDragging = false;
+    let startX, startY;     // Used for Canvas panning
+    let clickStartX, clickStartY; // Used for tap-distance measurement
 
-// When dragging, move the entire scene relative to the start point
-mapViewer.scene.addEventListener('stagemousemove', (e) => {
-    if (isDraggingMap) {
-        const dx = e.stageX - startStageX;
-        const dy = e.stageY - startStageY;
-        mapViewer.scene.x = startSceneX + dx;
-        mapViewer.scene.y = startSceneY + dy;
-    }
-});
+    canvas.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        
+        // Record starting positions
+        startX = e.clientX - mapViewer.scene.x;
+        startY = e.clientY - mapViewer.scene.y;
+        
+        clickStartX = e.clientX;
+        clickStartY = e.clientY;
+    });
 
-// When releasing touch/mouse, calculate if it was a Pan or a Tap
-mapViewer.scene.addEventListener('stagemouseup', (e) => {
-    isDraggingMap = false;
-    
-    // Calculate total pixels moved during the interaction
-    const moveDistance = Math.hypot(e.stageX - startStageX, e.stageY - startStageY);
-    
-    // If we moved less than 10 pixels, it was an intentional Click/Tap!
-    if (moveDistance < 10) {
-        if (robotMode === 'walk') return; // Safety check
+    canvas.addEventListener('pointermove', (e) => {
+        if (isDragging) {
+            // Pan the map
+            mapViewer.scene.x = e.clientX - startX;
+            mapViewer.scene.y = e.clientY - startY;
+        }
+    });
 
-        const displayPos = mapViewer.scene.globalToRos(e.stageX, e.stageY);
-        console.log(`[AUTONOMY] Target: X=${displayPos.x.toFixed(2)}, Y=${displayPos.y.toFixed(2)}`);
+    canvas.addEventListener('pointerup', (e) => {
+        isDragging = false;
 
-        const goalMessage = new ROSLIB.Message({
-            header: { frame_id: 'map', stamp: { sec: 0, nanosec: 0 } },
-            pose: {
-                position: { x: displayPos.x, y: displayPos.y, z: 0.0 },
-                orientation: { x: 0.0, y: 0.0, z: 0.0, w: 1.0 } 
+        // Calculate how many pixels the mouse/finger moved
+        const distanceMoved = Math.hypot(e.clientX - clickStartX, e.clientY - clickStartY);
+
+        // If it moved less than 10 pixels, it was a TAP, not a DRAG!
+        if (distanceMoved < 10) {
+            if (robotMode === 'walk') {
+                console.warn("[NAV] Cannot dispatch goals while in Walk Mode.");
+                return; 
             }
-        });
 
-        goalPublisher.publish(goalMessage);
-        if (navigator.vibrate) navigator.vibrate(50);
-    }
-});
+            // Convert pixel click to ROS meter coordinates (YOUR WORKING MATH)
+            // Note: We use stageX and stageY from the EaselJS event, which we can get 
+            // by converting the raw clientX/Y coordinates.
+            const rect = canvas.getBoundingClientRect();
+            const stageX = e.clientX - rect.left;
+            const stageY = e.clientY - rect.top;
+
+            const displayPos = mapViewer.scene.globalToRos(stageX, stageY);
+            
+            console.log(`[AUTONOMY] Target Set: X=${displayPos.x.toFixed(2)}, Y=${displayPos.y.toFixed(2)}`);
+
+            // Display target waypoint
+            goalMarker.x = displayPos.x;
+            goalMarker.y = displayPos.y;
+            goalMarker.visible = true;
+
+            const goalMessage = new ROSLIB.Message({
+                header: { frame_id: 'map', stamp: { sec: 0, nanosec: 0 } },
+                pose: {
+                    position: { x: displayPos.x, y: displayPos.y, z: 0.0 },
+                    orientation: { x: 0.0, y: 0.0, z: 0.0, w: 1.0 } 
+                }
+            });
+
+            goalPublisher.publish(goalMessage);
+            if (navigator.vibrate) navigator.vibrate([50]); // Haptic feedback
+        }
+    });
+
+    canvas.addEventListener('pointerleave', () => {
+        isDragging = false;
+    });
+
+}, 1000); // 1-second delay ensures Canvas exists
+
+
