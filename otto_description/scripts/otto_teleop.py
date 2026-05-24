@@ -11,6 +11,31 @@ from switch_mode import SwitchMode
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
+"""
+=============================================================================
+File: otto_teleop.py
+Role: The Locomotion Engine (Web-to-Robot Translator)
+
+Description:
+This script is the central command hub for manual control. It listens to 
+simple text commands sent from the web interface and translates them into 
+continuous, coordinated physical movements. 
+
+What it does:
+1. Command Listener: Subscribes to '/otto_command' to catch inputs like 
+   "walk_forward", "stop", or "switch_roll" from the browser.
+2. Dual Locomotion: Manages two entirely different ways of moving:
+   - Roll Mode: Sends continuous velocity (Twist) loops to the wheels.
+   - Walk Mode: Acts as a gait engine, sequencing precise angular positions 
+     (JointTrajectories) to the leg servos frame by frame.
+3. Live Tuning: Catches "tune_*" commands from web sliders to instantly 
+   recalculate walking kinematics (lean, pivot, stride speed) on the fly 
+   without needing to restart the node.
+4. State Safety: Safely manages the physical transformation between walking 
+   and rolling, ensuring all motors halt before the chassis shifts mode.
+=============================================================================
+"""
+
 class OttoTeleop(Node):
     def __init__(self):
         super().__init__('otto_teleop')
@@ -192,7 +217,7 @@ class OttoTeleop(Node):
         parts = command.split('_')
         prefix = parts[0]
 
-        # 1. LIVE TUNING (Engineering Drawer)
+        # LIVE TUNING (Engineering Drawer)
         if prefix == 'tune':
             param = parts[1]
             value = float(parts[2])
@@ -210,17 +235,18 @@ class OttoTeleop(Node):
             self.get_logger().info(f"[TUNING] Updated {param} to {value}")
             return
 
-        # 2. EMERGENCY STOP
+        # EMERGENCY STOP
         elif command == 'stop':
+            self.get_logger().warn('[STOP] stopping all motors.')
             self.stop_all_motors()
             return
 
-        # 3. GUARD CHECK
+        # GUARD CHECK
         if self.is_switching:
             self.get_logger().warn('[SYS] Ignored command. Chassis is currently shifting modes.')
             return
 
-        # 4. MODE SWITCHING
+        # MODE SWITCHING
         if prefix == 'switch':
             new_mode = parts[1] # 'walk' or 'roll'
             if new_mode != self.current_mode:
@@ -230,8 +256,8 @@ class OttoTeleop(Node):
                 threading.Thread(target=self._do_mode_switch, args=(new_mode,), daemon=True).start()
             return
 
-        # 5. MOVEMENT COMMANDS
-        # Expected format: "walk_forward", "roll_left", etc.
+        # MOVEMENT COMMANDS
+        # Expected format: "walk_forward", "roll_left"
         if len(parts) == 2:
             mode = parts[0]
             direction = parts[1]

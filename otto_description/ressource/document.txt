@@ -291,7 +291,8 @@ It takes the raw, massive grid data from the /map topic and draws it onto an HTM
 Set the default mode to walk in the navigation
 ----------------------------------------
 ** To Do **
-
+- Fix red stop botton (make it work)
+- Fix the click on the map to point should appears where the mouse clicked
 - Reduce wheel size
 - Rewrite all comment
 - Record sample web_video_server

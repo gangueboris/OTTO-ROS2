@@ -7,7 +7,29 @@ from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from builtin_interfaces.msg import Duration
 from geometry_msgs.msg import Twist
 
+"""
+=============================================================================
+File: switch_mode.py
+Role: The Transformer (Hardware Posture & Controller Manager)
 
+Description:
+This script handles the delicate sequence of physically transforming the robot 
+between its two states (walking and rolling) while safely hot-swapping the 
+underlying ROS 2 controllers so they don't fight each other.
+
+What it does:
+1. Controller Management: Acts as a service client to the '/controller_manager', 
+   allowing it to gracefully activate and deactivate control nodes on the fly.
+2. Switch to Roll: Wakes up the trajectory controller to physically tuck the 
+   legs 90 degrees into a driving posture, then hands brain control over to 
+   the diff_drive_controller.
+3. Switch to Walk: Safely halts the wheels, hands brain control back to the 
+   joint_trajectory_controller, and commands the robot to stand up straight.
+4. Conflict Prevention: Ensures smooth hardware hand-offs so that the wheel 
+   driver and the gait sequencer are never active at the same time, preventing 
+   motor collisions.
+=============================================================================
+"""
 class SwitchMode(Node):
     def __init__(self):
         super().__init__('Mode_switcher')
@@ -67,8 +89,8 @@ class SwitchMode(Node):
         msg.points.append(point)
         self.traj_pub.publish(msg)
 
-        # Wait for the trajectory to complete - ss confirmed working with Gazebo sim lag
-        self.ros_sleep(5)
+        # Wait for the trajectory to complete - 4s confirmed working with Gazebo sim lag
+        self.ros_sleep(4)
     
 
     def stop_rolling(self):

@@ -1,4 +1,30 @@
 <?xml version="1.0"?>
+<!--
+=============================================================================
+File: otto_ros2_control.xacro
+Role: The Hardware Abstraction Layer (Control Bridge)
+
+Description:
+This file connects the physical 3D model in Gazebo to the logical ROS 2
+controller managers. It acts as the "nervous system," mapping software
+commands to virtual motor movements.
+
+What it does:
+
+Hardware Mocking: Uses the 'gz_ros2_control' plugin to treat the Gazebo
+simulator as if it were the real-world microcontrollers and hardware.
+
+Motor Interfaces: Declares exactly how each joint can be driven:
+
+Wheels: Accept both 'velocity' and 'position' commands (for rolling).
+
+Hips & Feet: Accept 'position' commands (for walking).
+
+Controller Loading: Injects the ROS2 control plugin into the simulation
+and tells it to read your 'controllers.yaml' file to apply the correct
+driving and trajectory logics.
+===========================================================================
+-->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!--== Hardware Description ==-->

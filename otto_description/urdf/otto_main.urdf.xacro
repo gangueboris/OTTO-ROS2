@@ -1,4 +1,33 @@
 <?xml version="1.0"?>
+<!--
+=============================================================================
+File: otto_main.urdf.xacro
+Role: The Physical Blueprint (Robot Anatomy & Kinematics)
+
+Description:
+This is the master structural file for the robot. It defines the exact 3D
+geometry, mass, collision boundaries, and joint limits of Otto using XACRO
+(XML Macros) to keep the design modular and mathematically precise.
+
+What it does:
+
+Parametric Design: Centralizes all physical dimensions, masses, and servo
+limits at the top, making it easy to resize the robot without rewriting code.
+
+The Skeleton: Assembles the robot's physical links: the main body, the
+legs, the balance bars, and the feet/wheels.
+
+Hybrid Joints: Defines the crucial hybrid locomotion structure:
+
+Revolute Joints (Hips & Feet): Servos that bend and twist for walking.
+
+Continuous Joints (Wheels): Bearings at the base of the feet that spin
+infinitely for driving.
+
+Component Hub: Acts as the main tree, importing external attachments
+like sensors (LiDAR, Camera), displays, and 'ros2_control' plugins.
+===========================================================================
+-->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="otto">
 
   <!-- ── Include utilities ── -->

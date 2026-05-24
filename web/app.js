@@ -1,9 +1,36 @@
+/**
+ * =============================================================================
+ * File: app.js
+ * Role: The Brain of the UI (Frontend Logic & ROS 2 Bridge)
+ *
+ * Description:
+ * This script acts as the master control layer for the web interface. It 
+ * manages the WebSocket connection to the robot and translates human inputs 
+ * (clicks, touches, slider drags) into raw ROS 2 messages.
+ *
+ * What it does:
+ * 1. Nervous System: Establishes a live `roslibjs` WebSocket connection to 
+ * the robot and manages connection states and video feed rendering.
+ * 2. Teleoperation & Safety: Handles continuous D-Pad inputs for manual 
+ * movement and manages the E-Stop logic to instantly cancel hardware 
+ * velocities and autonomous navigation.
+ * 3. Live Tuning: Listens to the Engineering Drawer sliders and publishes 
+ * live kinematic adjustments (speed, step duration, stride pivot) to the 
+ * Python backend.
+ * 4. RVIZ-Lite (Mapping): Uses `ros2djs` to render the live SLAM map, plot 
+ * the robot's real-time odometry, and handle mouse panning/zooming on 
+ * the canvas.
+ * 5. Autonomous Dispatch: Converts screen pixel clicks on the map into exact 
+ * ROS world coordinates, deploying Nav2 goal poses to drive the robot.
+ * =============================================================================
+ */
+
 // --- STATE MANAGEMENT ---
 let robotMode = 'walk'; 
 let driveState = 'stop'; 
 
 // ==========================================
-// ROS 2 CONNECTION (THE NERVOUS SYSTEM)
+// ROS2 CONNECTION (THE NERVOUS SYSTEM)
 // ==========================================
 const IP_ADDRESS = window.location.hostname;
 
@@ -74,7 +101,7 @@ const walkSettings = document.getElementById('walk-settings');
 const dBtns = document.querySelectorAll('.d-btn');
 const btnStop = document.getElementById('btn-stop');
 
-// --- 1. MASTER TOGGLE (WALK / ROLL) ---
+// --- MASTER TOGGLE (WALK / ROLL) ---
 masterToggle.addEventListener('change', (e) => {
     robotMode = e.target.checked ? 'roll' : 'walk';
     
@@ -108,7 +135,7 @@ masterToggle.addEventListener('change', (e) => {
     }
 });
 
-// --- 3. ENGINEERING DRAWER (SPEED TUNING) ---
+// --- ENGINEERING DRAWER (SPEED TUNING) ---
 btnSettings.addEventListener('click', drawer_logic);
 
 function drawer_logic() {
@@ -143,7 +170,7 @@ document.querySelectorAll('input[type=range]').forEach(slider => {
     });
 });
 
-// --- 4. DEAD-MAN'S D-PAD LOGIC ---
+// --- DEAD-MAN'S D-PAD LOGIC ---
 dBtns.forEach(btn => {
     btn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
@@ -154,7 +181,7 @@ dBtns.forEach(btn => {
         
         if (navigator.vibrate) navigator.vibrate(40);
         
-        // e.g., "roll_forward" or "walk_left"
+        // "roll_forward" or "walk_left"
         sendOttoCommand(`${robotMode}_${direction}`);
     });
 
@@ -172,27 +199,27 @@ dBtns.forEach(btn => {
     btn.addEventListener('pointercancel', releaseThumb);
 });
 
-// --- 5. E-STOP ---
+// --- E-STOP ---
 btnStop.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Aggressive haptic pattern
     
     console.warn('[E-STOP] ACTIVATED. Halting all subsystems.');
 
-    // 1. Kill Manual Physics (Walking & Teleop)
+    // Kill Manual Physics (Walking & Teleop)
     sendOttoCommand('stop');
 
-    // 2. Kill Autonomous Navigation (Nav2)
+    // Kill Autonomous Navigation (Nav2)
     // Calling cancel() without a specific goal ID automatically aborts everything
     navClient.cancel();
 
-    // 3. Clear the UI Visuals
+    // Clear the UI Visuals
     // Hide the red destination marker so the operator knows the goal is wiped
     if (typeof goalMarker !== 'undefined') {
         goalMarker.visible = false;
     }
 
-    // 4. Brutalist UI Flash
+    // Brutalist UI Flash
     // Flash the button inverted colors for 200ms to confirm the strike
     btnStop.style.backgroundColor = '#000000';
     btnStop.style.color = '#ff3333';
@@ -204,10 +231,10 @@ btnStop.addEventListener('pointerdown', (e) => {
 
 
 // ==========================================
-// PHASE 3: AUTONOMOUS MAPPING & NAVIGATION
+//  AUTONOMOUS MAPPING & NAVIGATION
 // ==========================================
 
-// 1. Setup the Map Viewer (The Canvas)
+// Setup the Map Viewer (The Canvas)
 const mapViewer = new ROS2D.Viewer({
     divID: 'map-feed',
     width: window.innerWidth * 0.6,  
@@ -215,7 +242,7 @@ const mapViewer = new ROS2D.Viewer({
     background: '#111111'            
 });
 
-// 2. Setup the Map Client (Pulls data from /map topic)
+// Setup the Map Client (Pulls data from /map topic)
 const gridClient = new ROS2D.OccupancyGridClient({
     ros: ros,
     rootObject: mapViewer.scene,

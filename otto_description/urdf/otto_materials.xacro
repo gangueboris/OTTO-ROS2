@@ -1,4 +1,34 @@
 <?xml version="1.0"?>
+<!-- 
+=============================================================================
+File: otto_materials.xacro
+Role: The Physics & Aesthetics Library (Properties & Macros)
+
+Description:
+This file is a centralized utility library. It stores all the repeated
+mathematical formulas, physical properties, and colors so the main robot
+blueprint remains clean and easy to read.
+
+What it does:
+
+Physics Math (Inertia): Contains reusable macros that automatically
+calculate the complex 'moments of inertia' for boxes, cylinders, and
+spheres. This is mandatory for Gazebo to accurately simulate gravity,
+momentum, and balance.
+
+Friction Tuning: Explicitly sets the Gazebo friction coefficients (mu1,
+mu2) for the feet and supports. Notice that forward friction is set
+to 0 while lateral is high-this allows the robot to roll forward smoothly
+without dragging, while preventing it from sliding sideways.
+
+Visuals: Defines the exact RGBA color codes (Otto Blue, Grey) for
+both the standard ROS RViz visualizer and the Gazebo simulator lighting.
+
+Reusable Parts: Provides a plug-and-play template (servo_block) to quickly
+generate the physical shape and mass of an MG90 servo anywhere on the robot.
+===========================================================================
+-->
+
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="otto_materials">
 
   <!-- ============================================================

@@ -6,13 +6,9 @@
     base_frame: base_footprint
     scan_topic: /scan
     
-    # --- THE LOCALIZATION CHANGES ---
     mode: localization 
-    map_file_name: /home/boris/otto_ws/serialize_map 
-    
-    # Tell the robot roughly where it is starting
+    map_file_name: /home/boris/otto_ws/src/OTTO-ROS2/otto_description/maps/serialize_map 
     map_start_pose: [0.0, 0.0, 0.0] 
-    # --------------------------------
     
     transform_timeout: 0.5
     map_update_interval: 1.0

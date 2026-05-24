@@ -1,4 +1,4 @@
-twist_mux:
+twist_mux:                            # Node that merges multiple /cmd_vel sources into one final velocity command.
   ros__parameters:
     use_sim_time: true
     use_stamped: false
@@ -11,4 +11,4 @@ twist_mux:
       joystick:
         topic: teleop_cmd_vel  # otto_teleop and switch_mode drive output
         timeout: 0.5
-        priority: 50     # High priority so I can take control over the autonomous
+        priority: 50     # High priority so I can take control over the autonomous with joystick

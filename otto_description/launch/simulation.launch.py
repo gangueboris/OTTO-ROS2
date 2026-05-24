@@ -1,3 +1,25 @@
+"""
+=============================================================================
+File: simulation.launch.py
+Role: The Foundation (Simulation & Hardware Abstraction Bringup)
+
+Description:
+This file is the ground zero for the robot's simulated environment. It bridges 
+the gap between the virtual physics world (Gazebo) and the ROS 2 ecosystem.
+
+What it does:
+1. Blueprint: Parses the robot's physical description (URDF/XACRO) and 
+   publishes its state (TF tree).
+2. Environment: Boots up the Gazebo Harmonic simulator with the warehouse world.
+3. Spawning: Injects the 'otto' robot model into the virtual environment.
+4. Actuation: Loads the essential motor controllers (Diff-Drive for the base, 
+   Joint Trajectory for other mechanisms) via the controller_manager.
+5. Senses: Establishes the 'ros_gz_bridge' to pipe raw simulated sensor data 
+   (LiDAR scans, Camera images, and the simulation Clock) out of Gazebo 
+   and into ROS 2 so the SLAM and Navigation stacks can use them.
+=============================================================================
+"""
+
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -37,7 +59,6 @@ def generate_launch_description():
     )
 
     # Spawn the Robot in Gazebo
-
     spawn_entity = TimerAction(
         period=3.0,
         actions=[Node(
@@ -75,7 +96,6 @@ def generate_launch_description():
     )
 
     # Spawn diff_drive_controller
-    
     spawn_diff_drive = TimerAction(
             period=8.0,
             actions=[Node(

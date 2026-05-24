@@ -5,6 +5,26 @@ from rclpy.node import Node
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from builtin_interfaces.msg import Duration
 
+"""
+=============================================================================
+File: otto_walk_test.py
+Role: The Sandbox (Gait Calibration & Testing)
+
+Description:
+This is a standalone testing script used to design, empirically tune, and 
+verify the robot's bipedal walking sequence before integrating those 
+mechanics into the main teleoperation system.
+
+What it does:
+1. Sequencer: Runs a hardcoded, continuous 6-step walking loop (Lean, 
+   Pivot, Plant for both the left and right sides).
+2. Direct Actuation: Bypasses the complex web and teleop layers to directly 
+   command the 'joint_trajectory_controller'.
+3. Tuning Hub: Provides an isolated environment to safely experiment with 
+   kinematic variables (lean angles, pivot degrees, and phase timings) 
+   to find the most stable physical gait.
+=============================================================================
+"""
 class OttoWalk(Node):
     def __init__(self):
         super().__init__('otto_walk')
