@@ -61,7 +61,7 @@ class OttoTeleop(Node):
 
         # Velocity Loop Tracking
         self.vel_timer = None
-        self.current_vel = (0.0, 0.0) # (linear_x, angular_z)
+        self.current_vel = (0.0, 0.0) # (linear_x, angular_z
 
         # ---------------------------------------------------------
         # KINEMATIC VARIABLES (Dynamic / Tunable)
@@ -81,6 +81,9 @@ class OttoTeleop(Node):
         self.gaits = {}
         self._update_gaits()
         self.active_gait = self.gaits['forward']
+
+        # Start the active lock on boot
+        self._stop_vel_loop()
 
     def _update_gaits(self):
         """
@@ -172,17 +175,13 @@ class OttoTeleop(Node):
         if self.vel_timer:
             self.vel_timer.cancel()
             self.destroy_timer(self.vel_timer)
-        self.vel_timer = self.create_timer(0.1, self._vel_loop_callback, callback_group=self.main_cb_group)
+        self.vel_timer = self.create_timer(0.05, self._vel_loop_callback, callback_group=self.main_cb_group)
 
     def _vel_loop_callback(self):
         self.send_vel(self.current_vel[0], self.current_vel[1])
 
     def _stop_vel_loop(self):
-        if self.vel_timer:
-            self.vel_timer.cancel()
-            self.destroy_timer(self.vel_timer)
-            self.vel_timer = None
-        self.send_vel(0.0, 0.0)
+        self._start_vel_loop(0.0, 0.0)
 
     # ==========================================
     # SYSTEM CONTROLS
@@ -237,8 +236,19 @@ class OttoTeleop(Node):
 
         # EMERGENCY STOP
         elif command == 'stop':
-            self.get_logger().warn('[STOP] stopping all motors.')
+            # self.get_logger().warn('[STOP] stopping all motors.')
             self.stop_all_motors()
+            return
+        # --- RELEASE BLOCK ---
+        elif command == 'release':
+            self.current_state = 'release'
+            self.get_logger().info("[RELEASE] Hardware lock removed. Nav2 has control.")
+            
+            # Destroy the timer spamming 0.0 so twist_mux falls back to Nav2
+            if self.vel_timer:
+                self.vel_timer.cancel()
+                self.destroy_timer(self.vel_timer)
+                self.vel_timer = None
             return
 
         # GUARD CHECK

@@ -1,118 +1,94 @@
+```markdown
+# OTTO Ground Control Station
 
-## 0. Create a workspace
-## 1. Create a new directory for your workspace along with a 'src' folder inside it
-mkdir -p ~/ros2_ws/src
+A tactical, zero-latency Web Interface and ROS 2 backend for the bimodal OTTO robot. This project provides a complete Ground Control Station (GCS) to manage manual teleoperation, live camera streaming, Lifelong Mapping (SLAM), and autonomous navigation (Nav2) from a standard web browser.
 
-## 2. Navigate into the root of your new workspace
-cd ~/ros2_ws
+## 🚀 Key Features
 
-## 3. Build the empty workspace using colcon 
-colcon build
+* **Bimodal Locomotion Control:** Seamlessly switch the chassis between Walk (gait-based) and Roll (diff-drive) modes via a custom Python state-machine.
+* **Lifelong Mapping:** Integrates `slam_toolbox` in localization mode to dynamically expand the map when exploring unknown areas, updating the web interface in real-time.
+* **Click-to-Navigate:** RVIZ-lite web integration using `ros2djs`. Tap anywhere on the generated map to dispatch autonomous Nav2 goals.
+* **Hardware-Level E-Stop:** A custom 20Hz active software lock that exploits `twist_mux` priorities to instantly sever Nav2's control of the wheels during emergencies.
+* **Picture-in-Picture (PiP) UI:** A responsive, Neo-Brutalist flexbox interface that dynamically routes MJPEG camera streams and canvas maps to save browser bandwidth and optimize screen real estate.
 
-## 4. Source the new setup file so your terminal recognizes the workspace
+---
+
+## 🏗️ System Architecture
+
+### Frontend (Web Interface)
+* **HTML/CSS/JS:** Vanilla web stack with a high-contrast tactical aesthetic.
+* **roslibjs:** Handles websocket communication (Topics, Services, Actions) with the ROS 2 backend.
+* **ros2djs & EaselJS:** Renders the SLAM occupancy grid and handles affine transformations for panning, zooming, and coordinate mapping.
+
+### Backend (ROS 2)
+* **rosbridge_server:** Bridges the ROS 2 network to the web browser via WebSockets.
+* **otto_teleop.py:** The central locomotion engine. Handles web commands, manages the 20Hz E-Stop lock, and sequences walking trajectories.
+* **twist_mux:** The hardware gatekeeper that prioritizes manual teleop commands over autonomous Nav2 commands.
+* **slam_toolbox & Nav2:** Manages the `.posegraph` lifelong mapping and global/local path planning.
+
+---
+
+## 📦 Installation & Prerequisites
+
+This project is built for **ROS 2** (Humble/Iron) and requires the following standard packages to be installed on the robot/host machine.
+
+```bash
+# Install core ROS 2 dependencies
+sudo apt update
+sudo apt install ros-$ROS_DISTRO-rosbridge-server \
+                 ros-$ROS_DISTRO-slam-toolbox \
+                 ros-$ROS_DISTRO-navigation2 \
+                 ros-$ROS_DISTRO-nav2-bringup \
+                 ros-$ROS_DISTRO-twist-mux \
+                 ros-$ROS_DISTRO-ros2-control \
+                 ros-$ROS_DISTRO-ros2-controllers
+
+```
+
+*Note: You must also have a camera node and `web_video_server` running to broadcast the MJPEG stream to the web interface.*
+
+---
+
+## ⚙️ Setup and Launch
+
+**1. Build the Workspace**
+Clone this repository into your ROS 2 workspace and build it:
+
+```bash
+cd ~/otto_ws
+colcon build --packages-select otto_description
 source install/setup.bash
+ros2 launch otto_description simulation.launch.py
 
-## ROS 2 Jazzy: Beginner's Command Cheat Sheet
+```
 
-This guide covers the essential commands needed to navigate, build, and troubleshoot a ROS 2 workspace, with a specific focus on Python development.
+**2. Launch the Robot Stack**
+Start the ROS 2 backend (which includes the robot state publisher, twist_mux, SLAM, and Nav2):
 
-## 1. Environment Setup
-Before you can use ROS 2 commands or run your code, your terminal needs to know where ROS 2 and your specific workspace are located.
+```bash
+ros2 launch otto_description nav_slam.launch.py
 
-* **Source the main ROS 2 installation:**
-    ```bash
-    source /opt/ros/jazzy/setup.bash
-    ```
-    *(Note: If you added this to your `~/.bashrc` earlier, this happens automatically when you open a new terminal).*
+```
 
-* **Source your personal workspace (run this *inside* your `ros2_ws` folder after building):**
-    ```bash
-    source install/setup.bash
-    ```
+**3. Launch the Web Bridge**
+In a new terminal, open the websocket and video servers:
 
-## 2. Workspaces and Building
-In ROS 2, you write your code inside a "workspace" (usually a folder named `ros2_ws`). You must build your workspace for ROS 2 to recognize your code.
+```bash
+ros2 launch otto_description web_control.launch.py
 
-* **Build the entire workspace (Run from the root of your workspace, e.g., `~/ros2_ws`):**
-    ```bash
-    colcon build
-    ```
-* **Build with symlinks (Highly recommended for Python!):**
-    ```bash
-    colcon build --symlink-install
-    ```
-    *Why?* This allows you to edit your Python scripts and see the changes immediately the next time you run them, without having to run `colcon build` all over again.
+```
 
-## 3. Creating Packages
-Code in ROS 2 is organized into packages. Since you are focusing on Python, you will use the `ament_python` build type.
+**4. Open the Interface**
+Simply open `index.html` in any modern web browser. (If running on a separate device, ensure the `IP_ADDRESS` variable in `app.js` is set to the robot's local IP).
 
-* **Create a new Python package (Run inside your `src` folder):**
-    ```bash
-    ros2 pkg create --build-type ament_python <package_name> --dependencies rclpy
-    ```
-    * `<package_name>`: The name of your package (e.g., `my_robot_controller`).
-    * `--dependencies rclpy`: Automatically links the ROS 2 Python library (`rclpy`).
+---
 
-* **List all installed packages:**
-    ```bash
-    ros2 pkg list
-    ```
+## 🎮 Interface Guide
 
-## 4. Running Code
-There are two main ways to start your code in ROS 2: running individual "nodes" (single scripts) or running "launch files" (which start multiple nodes at once).
+* **Walk Mode:** The interface defaults to Walk mode. The map is disabled, and the main screen displays the live camera feed. Use the D-Pad to trigger walking gaits.
+* **Roll Mode:** Flipping the main toggle shifts the chassis into diff-drive mode. The UI enters Picture-in-Picture mode: the SLAM map takes the center screen, and the camera moves to the secondary display.
+* **Autonomous Navigation:** In Roll mode, tap anywhere on the map to drop a waypoint. Nav2 will calculate a path and drive the robot.
+* **The E-Stop:** Hitting the red STOP button triggers the hardware lock. It will instantly halt walking, manual rolling, or autonomous navigation. Tap the map to release the lock and resume autonomy.
 
-* **Run a specific node:**
-    ```bash
-    ros2 run <package_name> <executable_name>
-    ```
-    *Example:* `ros2 run turtlesim turtlesim_node`
-
-* **Run a launch file:**
-    ```bash
-    ros2 launch <package_name> <launch_file_name.launch.py>
-    ```
-
-## 5. System Introspection (Debugging)
-These are your troubleshooting tools. When your robot isn't doing what you want, you will use these commands to see what is happening under the hood.
-
-### Nodes (The active programs)
-* **List all currently running nodes:**
-    ```bash
-    ros2 node list
-    ```
-* **Get detailed info about a specific node (what it's publishing/subscribing to):**
-    ```bash
-    ros2 node info /<node_name>
-    ```
-
-### Topics (The data highways)
-Nodes communicate by sending messages over "topics". 
-* **List all active topics:**
-    ```bash
-    ros2 topic list
-    ```
-* **See the actual data being sent on a topic in real-time:**
-    ```bash
-    ros2 topic echo /<topic_name>
-    ```
-    *Example:* `ros2 topic echo /cmd_vel` will show you the exact speed commands being sent to the robot.
-* **Find out what type of message a topic uses:**
-    ```bash
-    ros2 topic info /<topic_name>
-    ```
-* **Manually publish data to a topic from the terminal:**
-    ```bash
-    ros2 topic pub /<topic_name> <message_type> "<data>"
-    ```
-    *Example:* `ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5}, angular: {z: 0.5}}"`
-
-## 1. Go to your native Linux home directory
-cd ~
-
-## 2. Create a new workspace folder, and a 'src' folder inside it
-mkdir -p ~/ros2_ws/src
-
-## 3. Move into the 'src' folder (where your packages will live)
-cd ~/ros2_ws/src
-
+---
 

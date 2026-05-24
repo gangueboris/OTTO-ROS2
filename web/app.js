@@ -78,12 +78,6 @@ function sendOttoCommand(commandString) {
     console.log(`[TX] /otto_command -> '${commandString}'`);
 }
 
-// --- DEFINE NAV2 ACTION CLIENT ---
-const navClient = new ROSLIB.ActionClient({
-    ros: ros,
-    serverName: '/navigate_to_pose',
-    actionName: 'nav2_msgs/action/NavigateToPose'
-});
 
 // ==========================================
 // DOM ELEMENTS & UI LOGIC
@@ -200,27 +194,22 @@ dBtns.forEach(btn => {
 });
 
 // --- E-STOP ---
+// --- 5. E-STOP (THE HARDWARE OVERRIDE) ---
 btnStop.addEventListener('pointerdown', (e) => {
     e.preventDefault();
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Aggressive haptic pattern
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
     
-    console.warn('[E-STOP] ACTIVATED. Halting all subsystems.');
+    console.warn('[E-STOP] ACTIVATED. Engaging twist_mux hardware lock.');
 
-    // Kill Manual Physics (Walking & Teleop)
+    // Send the simple stop string to your Python Adapter
     sendOttoCommand('stop');
 
-    // Kill Autonomous Navigation (Nav2)
-    // Calling cancel() without a specific goal ID automatically aborts everything
-    navClient.cancel();
-
     // Clear the UI Visuals
-    // Hide the red destination marker so the operator knows the goal is wiped
     if (typeof goalMarker !== 'undefined') {
         goalMarker.visible = false;
     }
 
     // Brutalist UI Flash
-    // Flash the button inverted colors for 200ms to confirm the strike
     btnStop.style.backgroundColor = '#000000';
     btnStop.style.color = '#ff3333';
     setTimeout(() => {
@@ -228,7 +217,6 @@ btnStop.addEventListener('pointerdown', (e) => {
         btnStop.style.color = '';
     }, 200);
 });
-
 
 // ==========================================
 //  AUTONOMOUS MAPPING & NAVIGATION
@@ -368,26 +356,38 @@ setTimeout(() => {
                 return; 
             }
 
-            // Convert pixel click to ROS meter coordinates (YOUR WORKING MATH)
-            // Note: We use stageX and stageY from the EaselJS event, which we can get 
-            // by converting the raw clientX/Y coordinates.
+            //  Get the actual bounds of the canvas on the screen
             const rect = canvas.getBoundingClientRect();
-            const stageX = e.clientX - rect.left;
-            const stageY = e.clientY - rect.top;
 
-            const displayPos = mapViewer.scene.globalToRos(stageX, stageY);
-            
-            console.log(`[AUTONOMY] Target Set: X=${displayPos.x.toFixed(2)}, Y=${displayPos.y.toFixed(2)}`);
+            //  Calculate the click as a percentage of the visible box (0.0 to 1.0)
+            const percentX = (e.clientX - rect.left) / rect.width;
+            const percentY = (e.clientY - rect.top) / rect.height;
 
-            // Display target waypoint
-            goalMarker.x = displayPos.x;
-            goalMarker.y = displayPos.y;
+            //  Multiply by the internal canvas resolution to get the true pixel
+            const truePixelX = percentX * canvas.width;
+            const truePixelY = percentY * canvas.height;
+
+            //  Convert the true pixel into the Scene's coordinate space (Meters)
+            const localPos = mapViewer.scene.globalToLocal(truePixelX, truePixelY);
+
+            //  ROS X is localPos.x. ROS Y is inverted localPos.y
+            const rosX = localPos.x;
+            const rosY = -localPos.y; 
+
+            console.log(`[AUTONOMY] Target Set: X=${rosX.toFixed(2)}, Y=${rosY.toFixed(2)}`);
+            // RELEASE THE HARDWARE LOCK SO NAV2 CAN DRIVE
+            sendOttoCommand('release');
+
+            // Display target waypoint on the canvas (Y must stay inverted for drawing)
+            goalMarker.x = rosX;
+            goalMarker.y = -rosY; 
             goalMarker.visible = true;
 
+            // Build and send the ROS message
             const goalMessage = new ROSLIB.Message({
                 header: { frame_id: 'map', stamp: { sec: 0, nanosec: 0 } },
                 pose: {
-                    position: { x: displayPos.x, y: displayPos.y, z: 0.0 },
+                    position: { x: rosX, y: rosY, z: 0.0 },
                     orientation: { x: 0.0, y: 0.0, z: 0.0, w: 1.0 } 
                 }
             });

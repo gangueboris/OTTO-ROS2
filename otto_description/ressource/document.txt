@@ -291,20 +291,17 @@ It takes the raw, massive grid data from the /map topic and draws it onto an HTM
 Set the default mode to walk in the navigation
 ----------------------------------------
 ** To Do **
-- Fix red stop botton (make it work)
-- Fix the click on the map to point should appears where the mouse clicked
 - Reduce wheel size
-- Rewrite all comment
 - Record sample web_video_server
 - organize the process for the blog
-
+- Update the README
 
 ===== Check up =====
 - Conrolled Walking mode ok
 - Controlled rolling mode ok
 - Walking then switch to rolling ok
 - rolling the switch to walking   ok
-- Autonomous navigation rolling mode (map is messy)
+- Autonomous navigation rolling mode ok
 
 
 === Record the simulation ===
